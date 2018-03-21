@@ -1,5 +1,7 @@
 module CircuitSimulator
 
-# package code goes here
+using ResumableFunctions
+
+include("readcards.jl")
 
 end # module
