@@ -1,24 +1,34 @@
 
 function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
-    m = match(r"^([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])\s([a-z][^(){}+*/-]*\s*(?:=|\s)\s*[^*/+-]\S*.*)"i,line) # two nodes
-    println(m)
+    regex = r"^(([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])
+    \s+([a-z][^(){}+*/-]*\s*(?:=|\s)\s*[^*/+-]\S*.*)*)
+    |
+    ([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])\s*$"ix
+    m = match(regex, line) # two nodes
     m === nothing && return false
-    name = Symbol(m.captures[1])
-    node_strings = (m.captures[2],m.captures[3])
-    value_string = m.captures[4]
-    parameters_string = m.captures[5]
+    if ~(m.captures[1] === nothing)
+        name = Symbol(m.captures[2])
+        node_strings = (m.captures[3],m.captures[4])
+        value_string = m.captures[5]
+        parameters_string = m.captures[6]
+    else
+        name = Symbol(m.captures[7])
+        node_strings = (m.captures[8],m.captures[9])
+        value_string = m.captures[10]
+        parameters_string = ""
+    end
     value = parse_spiceexpression(value_string,N)
     nodes = update_nodedict!(pc, node_strings)
     if line[1] == 'R'
-        newcomponent = Resistor(name, nodes, value, parameters_string)
+        newcomponent = resistor(name, nodes, value, parameters_string)
     elseif line[1] == 'C'
-        newcomponent = Capacitor(name, nodes, value, parameters_string)
+        newcomponent = capacitor(name, nodes, value, parameters_string)
     elseif line[1] =='L'
-        newcomponent = Inductor(name, nodes, value, parameters_string)
+        newcomponent = inductor(name, nodes, value, parameters_string)
     elseif line[1] =='V'
-        newcomponent = VoltageSource(name, nodes, value, parameters_string)
+        newcomponent = voltageSource(name, nodes, value, parameters_string)
     elseif line[1] =='I'
-        newcomponent = CurrentSource(name, nodes, value, parameters_string)
+        newcomponent = currentSource(name, nodes, value, parameters_string)
     end
     pc.max_element +=1
     push!(pc.netlist, newcomponent)
@@ -29,12 +39,12 @@ function update_nodedict!(pc::ParsedCircuit, node_strings)
     nodearray = Vector{Int}()
         for node_string in node_strings
             node = Symbol(node_string)
-            pc.max_node +=1
             if ~(node ∈ keys(pc.nodedict))
-            pc.nodedict[node]=pc.max_node
-        end
+                pc.max_node +=1
+                pc.nodedict[node]=pc.max_node
+            end
         push!(nodearray, pc.nodedict[node])
-    end
+        end
     (nodearray...)
 end
 

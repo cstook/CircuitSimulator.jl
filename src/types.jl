@@ -8,19 +8,19 @@ end
 abstract type Component{N<:Number} end
 
 struct Resistor{N} <: Component{N} @componentfileds end
-Resistor(name, nodes, value, parameters_string::Any) = Resistor(name, nodes, value)
+resistor(name, nodes, value, parameters_string) = Resistor(name, nodes, value)
 
 struct Inductor{N} <: Component{N} @componentfileds end
-Inductor(name, nodes, value, parameters_string) = Inductor(name, nodes, value)
+inductor(name, nodes, value, parameters_string) = Inductor(name, nodes, value)
 
 struct Capacitor{N} <: Component{N} @componentfileds end
-Capacitor(name, nodes, value, parameters_string) = Capacitor(name, nodes, value)
+capacitor(name, nodes, value, parameters_string) = Capacitor(name, nodes, value)
 
 struct VoltageSource{N} <: Component{N} @componentfileds end
-VoltageSource(name, nodes, value, parameters_string) = VoltageSource(name, nodes, value)
+voltageSource(name, nodes, value, parameters_string) = VoltageSource(name, nodes, value)
 
 struct CurrentSource{N} <: Component{N} @componentfileds end
-CurrentSource(name, nodes, value, parameters_string) = CurrentSource(name, nodes, value)
+currentSource(name, nodes, value, parameters_string) = CurrentSource(name, nodes, value)
 
 const nodedict_type = Dict{Symbol,Int}
 
