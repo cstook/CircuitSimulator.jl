@@ -8,19 +8,19 @@ end
 abstract type Component{N<:Number} end
 
 struct Resistor{N} <: Component{N} @componentfileds end
-Resistor(name, nodes, value, parameter_string) = Resistor(name, nodes, value)
+Resistor(name, nodes, value, parameters_string::Any) = Resistor(name, nodes, value)
 
 struct Inductor{N} <: Component{N} @componentfileds end
-Inductor(name, nodes, value, parameter_string) = Inductor(name, nodes, value)
+Inductor(name, nodes, value, parameters_string) = Inductor(name, nodes, value)
 
 struct Capacitor{N} <: Component{N} @componentfileds end
-Capacitor(name, nodes, value, parameter_string) = Capacitor(name, nodes, value)
+Capacitor(name, nodes, value, parameters_string) = Capacitor(name, nodes, value)
 
 struct VoltageSource{N} <: Component{N} @componentfileds end
-VoltageSource(name, nodes, value, parameter_string) = VoltageSource(name, nodes, value)
+VoltageSource(name, nodes, value, parameters_string) = VoltageSource(name, nodes, value)
 
 struct CurrentSource{N} <: Component{N} @componentfileds end
-CurrentSource(name, nodes, value, parameter_string) = CurrentSource(name, nodes, value)
+CurrentSource(name, nodes, value, parameters_string) = CurrentSource(name, nodes, value)
 
 const nodedict_type = Dict{Symbol,Int}
 
@@ -71,44 +71,4 @@ struct MNAbuilder{N<:Number}
     currentdict :: nodedict_type
     MNAbuilder{N}() where N<:Number =
         new([],[],[],[],[],[],[],[],[],[],[],[],[],Dict(),Dict(),Dict())
-end
-
-function parse_2nodecomponent!(pc::ParsedCircuit, line)
-    m = match(r"^([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])\s([a-z][^(){}+*/-]*\s*(?:=|\s)\s*[^*/+-]\S*.*)"i,line) # two nodes
-    m === nothing && return
-    name = Symbol(m.captures[1])
-    node_strings = (m.captures[2],m.captures[3])
-    value_string = m.captures[4]
-    parameters_string = m.captures[5]
-    value = parse_spiceexpression(value_string)
-    nodes = update_nodedict!(pc, node_strings)
-    if line[1] == 'R'
-        newcomponent = Resistor(name, nodes, value, parameter_string)
-    elseif line[1] == 'C'
-        newcomponent = Capacitor(name, nodes, value, parameter_string)
-    elseif line[1] =='L'
-        newcomponent = Inductor(name, nodes, value, parameter_string)
-    elseif line[1] =='V'
-        newcomponent = VoltageSource(name, nodes, value, parameter_string)
-    elseif line[1] =='I'
-        newcomponent = CurrentSource(name, nodes, value, parameter_string)
-    end
-    pc.max_element +=1
-    push!(pc.netlist, newcomponent)
-end
-
-function update_nodedict!(pc::ParsedCircuit, node_strings)
-    nodearray = Array{Int}()
-        for node_string in node_strings
-            pc.max_node +=1
-            if ~(node_string ∈ keys(pc.nodedict))
-            pc.nodedict[node_string]=pc.max_node
-        end
-        push!(nodearray, pc.nodedict[node_string])
-    end
-    (nodearray...)
-end
-
-function parse_spiceexpression(s)
-    parse(s)  # for now
 end
