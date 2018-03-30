@@ -6,11 +6,21 @@
 end
 
 abstract type Component{N<:Number} end
+
 struct Resistor{N} <: Component{N} @componentfileds end
+Resistor(name, nodes, value, parameter_string) = Resistor(name, nodes, value)
+
 struct Inductor{N} <: Component{N} @componentfileds end
+Inductor(name, nodes, value, parameter_string) = Inductor(name, nodes, value)
+
 struct Capacitor{N} <: Component{N} @componentfileds end
+Capacitor(name, nodes, value, parameter_string) = Capacitor(name, nodes, value)
+
 struct VoltageSource{N} <: Component{N} @componentfileds end
+VoltageSource(name, nodes, value, parameter_string) = VoltageSource(name, nodes, value)
+
 struct CurrentSource{N} <: Component{N} @componentfileds end
+CurrentSource(name, nodes, value, parameter_string) = CurrentSource(name, nodes, value)
 
 const nodedict_type = Dict{Symbol,Int}
 
@@ -64,25 +74,25 @@ struct MNAbuilder{N<:Number}
 end
 
 function parse_2nodecomponent!(pc::ParsedCircuit, line)
-    m = match(r"^([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*)"i,line) # two nodes
+    m = match(r"^([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])\s([a-z][^(){}+*/-]*\s*(?:=|\s)\s*[^*/+-]\S*.*)"i,line) # two nodes
     m === nothing && return
     name = Symbol(m.captures[1])
     node_strings = (m.captures[2],m.captures[3])
-    value_string, parameter_dict = parse_valueparameters(m.captures[4])
-    value_string === nothing && return
+    value_string = m.captures[4]
+    parameters_string = m.captures[5]
+    value = parse_spiceexpression(value_string)
     nodes = update_nodedict!(pc, node_strings)
     if line[1] == 'R'
-        newcomponent = R(name, nodes, parameter_dict, value_string)
+        newcomponent = Resistor(name, nodes, value, parameter_string)
     elseif line[1] == 'C'
-        newcomponent = C(name, nodes, parameter_dict, value_string)
+        newcomponent = Capacitor(name, nodes, value, parameter_string)
     elseif line[1] =='L'
-        newcomponent = L(name, nodes, parameter_dict, value_string)
+        newcomponent = Inductor(name, nodes, value, parameter_string)
     elseif line[1] =='V'
-        newcomponent = V(name, nodes, parameter_dict, value_string)
+        newcomponent = VoltageSource(name, nodes, value, parameter_string)
     elseif line[1] =='I'
-        newcomponent = I(name, nodes, parameter_dict, value_string)
+        newcomponent = CurrentSource(name, nodes, value, parameter_string)
     end
-
     pc.max_element +=1
     push!(pc.netlist, newcomponent)
 end
@@ -99,8 +109,6 @@ function update_nodedict!(pc::ParsedCircuit, node_strings)
     (nodearray...)
 end
 
-function parse_valueparameters(s)
-    m = match(r""i,s)
-    m === nothing && return
-
+function parse_spiceexpression(s)
+    parse(s)  # for now
 end
