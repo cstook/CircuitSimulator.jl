@@ -72,7 +72,6 @@ function parse_spiceexpression(N,s)
     done, value = parse_spicevalue(N,s); done && return value
     done, expression = parse_spiceexpression(s); done && return value
     throw(ErrorException("Could Not Process: $s"))
-    # parse(N,s)  # for now
 end
 function parse_spicevalue(N,s)
     m = match(r"^\s*((?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)
@@ -83,4 +82,21 @@ function parse_spicevalue(N,s)
     unitstring === nothing || (value *= N(units[lowercase(unitstring)]))
     return (true, value)
 end
-parse_spiceexpression(s) = (true, :nothing) # placeholder
+function parse_spiceexpression(s)
+    s = fix_spiceunits(s)
+    s = fix_netvoltages(s)
+    fix_branchcurrents(s)
+end
+function fix_spiceunits(s)
+    regex = r"(?<![a-z_])(?<value>(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)
+              (?<unit>k|meg|mil|g|t|m|u|μ|n|p|f)(?<junk>[a-z0-9_]*)()"ix
+    m = match(regex,s)
+    m === nothing && return s
+    value,unit,junk,null = m.captures
+    value_offset, unit_offset, junk_offset, next_offset = m.offsets
+    s[1:prevind(s,value_offset)] * value * stringunits[lowercase(unit)] * fix_spiceunits(s[next_offset:end])
+end
+function fix_netvoltages(s)
+end
+function fix_branchcurrents(s)
+end
