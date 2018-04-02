@@ -2,7 +2,7 @@
 @def componentfileds begin
     name :: Symbol
     nodes :: Tuple{Vararg{Int}}
-    value :: Union{Function,N}
+    value :: Union{Expr,N}
 end
 
 abstract type Component{N<:Number} end

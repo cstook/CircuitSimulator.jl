@@ -1,5 +1,3 @@
-
-
 @resumable function readcards(io::IO)::String
     iscontinueline, card = cardpart(readnoncommentline(io))
     while ~eof(io)

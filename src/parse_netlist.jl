@@ -17,7 +17,7 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
         value_string = m.captures[10]
         parameters_string = ""
     end
-    value = parse_spiceexpression(value_string,N)
+    value = parse_spiceexpression(N, value_string)
     nodes = update_nodedict!(pc, node_strings)
     if line[1] == 'R'
         newcomponent = resistor(name, nodes, value, parameters_string)
@@ -50,8 +50,11 @@ end
 
 function parse_netlist(filename::AbstractString)
     io = open(filename)
-    pc = parse_netlist(io)
-    close(io)
+    try
+        pc = parse_netlist(io)
+    finally
+        close(io)
+    end
     return pc
 end
 function parse_netlist(io::IO, N::Type=Float64)
@@ -65,17 +68,19 @@ function parse_netlist(io::IO, N::Type=Float64)
     return pc
 end
 
-function parse_spiceexpression(s,N)
-    convert(N,parse(s))  # for now
+function parse_spiceexpression(N,s)
+    done, value = parse_spicevalue(N,s); done && return value
+    done, expression = parse_spiceexpression(s); done && return value
+    throw(ErrorException("Could Not Process: $s"))
+    # parse(N,s)  # for now
 end
-
-#=
-constantNumeric:
-    match: '(?i:(?<![a-z_])((?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)(k|meg|mil|g|t|m|u|μ|n|p|f){0,1}([a-z0-9_]*))'
-    name: 'meta.numeric.ngspice'
-    captures:
-      1: name: 'constant.numeric.ngspice'
-      2: name: 'constant.numeric.ngspice'
-      3: name: ''
-
-=#
+function parse_spicevalue(N,s)
+    m = match(r"^\s*((?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)
+                (k|meg|mil|g|t|m|u|μ|n|p|f){0,1}[a-z0-9_.]*\s*$"ix,s)
+    m === nothing && return (false, nothing)
+    value = parse(N,m.captures[1])
+    unitstring = m.captures[2]
+    unitstring === nothing || (value *= N(units[lowercase(unitstring)]))
+    return (true, value)
+end
+parse_spiceexpression(s) = (true, :nothing) # placeholder
