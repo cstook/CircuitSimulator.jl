@@ -26,4 +26,9 @@ using CircuitSimulator: ParsedCircuit, MNA, MNAbuilder,
     @test pc.netlist[5] == VoltageSource(:V1,(2,0),2.0)
     @test pc.netlist[6] == CurrentSource(:I1,(4,2),3.0)
     @test pc.max_element == length(pc.netlist)
+    netlist2=IOBuffer(
+    """netlist2
+    R1 a b 10k + V(a) + V(b,1)
+    """)
+    pc2 = parse_netlist(netlist2)
 end
