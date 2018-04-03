@@ -29,6 +29,18 @@ using CircuitSimulator: ParsedCircuit, MNA, MNAbuilder,
     netlist2=IOBuffer(
     """netlist2
     R1 a b 10k + V(a) + V(b,1)
+    R1 a b 10k + V(a) + V(b,1) a = 1 b = 34
+    R1 a b 10k + V(a) + V(b,1) a 1 b 34
+    R1 c d I(R1) - 7.9megOhm
     """)
     pc2 = parse_netlist(netlist2)
+    eval(:(@inline netvoltage(::Val{:a}) = 5e3))
+    eval(:(@inline netvoltage(::Val{:b}) = 20e3))
+    eval(:(@inline netvoltage(::Val{Symbol("1")}) = 40e3))
+    eval(:(@inline branchcurrent(::Val{:R1}) = 4.3e6))
+    eval(pc2.netlist[1].value)
+    @test eval(pc2.netlist[1].value) ≈ -5.00e3
+    @test eval(pc2.netlist[2].value) ≈ -5.00e3
+    @test eval(pc2.netlist[3].value) ≈ -5.00e3
+    @test eval(pc2.netlist[4].value) ≈ -3.6e6
 end
