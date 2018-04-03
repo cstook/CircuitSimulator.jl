@@ -1,21 +1,19 @@
 
 function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
-    regex = r"^(([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])
-    \s+([a-z][^(){}+*/-]*\s*(?:=|\s)\s*[^*/+-]\S*.*)*)
-    |
-    ([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*?)(?<![+*/-])\s*$"ix
+    regex1 = regex = r"^([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*)"i
     m = match(regex, line) # two nodes
     m === nothing && return false
-    if ~(m.captures[1] === nothing)
-        name = Symbol(m.captures[2])
-        node_strings = (m.captures[3],m.captures[4])
-        value_string = m.captures[5]
-        parameters_string = m.captures[6]
-    else
-        name = Symbol(m.captures[7])
-        node_strings = (m.captures[8],m.captures[9])
-        value_string = m.captures[10]
+    name = Symbol(m.captures[1])
+    node_strings = (m.captures[2],m.captures[3])
+    restofline = m.captures[4]
+    regex2 = r"[a-z0-9_)}\'\"]()\s+[a-z_]"i
+    m = match(regex2,restofline)
+    if m === nothing
+        value_string = restofline
         parameters_string = ""
+    else
+        value_string = restofline[1:m.offsets[1]]
+        parameters_string = restofline[nextind(line,m.offsets[1]):end]
     end
     value = parse_spiceexpression(N, value_string)
     nodes = update_nodedict!(pc, node_strings)
@@ -69,9 +67,8 @@ function parse_netlist(io::IO, N::Type=Float64)
 end
 
 function parse_spiceexpression(N,s)
-    println("Spice Expression: ",s)
     done, value = parse_spicevalue(N,s); done && return value
-    done, expression = parse_spiceexpression(s); done && return value
+    done, expression = parse_spiceexpression(s); done && return expression
     throw(ErrorException("Could Not Process: $s"))
 end
 function parse_spicevalue(N,s)
@@ -86,7 +83,8 @@ end
 function parse_spiceexpression(s)
     s = fix_spiceunits(s)
     s = fix_netvoltages(s)
-    fix_branchcurrents(s)
+    s = fix_branchcurrents(s)
+    (true,parse(s))
 end
 function fix_spiceunits(s)
     regex = r"(?<![a-z_])(?<value>(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)
@@ -98,14 +96,14 @@ function fix_spiceunits(s)
     s[1:prevind(s,value_offset)] * value * stringunits[lowercase(unit)] * fix_spiceunits(s[next_offset:end])
 end
 function fix_netvoltages(s)
-    s = replace(s,r"v\(\s*(?<name>[^ ,]+)\s*\)"i,s"netvoltage(::Val{Symbol(\"\g<name>\")})")
+    s = replace(s,r"v\(\s*(?<name>[^ ,]+)\s*\)"i,s"netvoltage(Val(Symbol(\"\g<name>\")))")
     regex = r"v\(\s*(?<name1>\S+)\s*,\s*(?<name2>\S+)\s*\)"i
-    subex = s"netvoltage(::Val{Symbol(\"\g<name1>\")})-netvoltage(::Val{Symbol(\"\g<name2>\")})"
+    subex = s"netvoltage(Val(Symbol(\"\g<name1>\")))-netvoltage(Val(Symbol(\"\g<name2>\")))"
     replace(s,regex,subex)
 end
 function fix_branchcurrents(s)
-    s = replace(s,r"i\(\s*(?<name>[^ ,]+)\s*\)"i,s"branchcurrent(::Val{Symbol(\"\g<name>\")})")
+    s = replace(s,r"i\(\s*(?<name>[^ ,]+)\s*\)"i,s"branchcurrent(Val(Symbol(\"\g<name>\")))")
     regex = r"i\(\s*(?<name1>\S+)\s*,\s*(?<name2>\S+)\s*\)"i
-    subex = s"branchcurrent(::Val{Symbol(\"\g<name1>\")})-branchcurrent(::Val{Symbol(\"\g<name2>\")})"
+    subex = s"branchcurrent(Val(Symbol(\"\g<name1>\")))-branchcurrent(Val(Symbol(\"\g<name2>\")))"
     replace(s,regex,subex)
 end

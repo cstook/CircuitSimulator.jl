@@ -2,24 +2,24 @@
 @def componentfileds begin
     name :: Symbol
     nodes :: Tuple{Vararg{Int}}
-    value :: Union{Expr,N}
+    value :: U
 end
 
-abstract type Component{N<:Number} end
+abstract type Component{U<:Union{Expr,Number}} end
 
-struct Resistor{N} <: Component{N} @componentfileds end
+struct Resistor{U} <: Component{U} @componentfileds end
 resistor(name, nodes, value, parameters_string) = Resistor(name, nodes, value)
 
-struct Inductor{N} <: Component{N} @componentfileds end
+struct Inductor{U} <: Component{U} @componentfileds end
 inductor(name, nodes, value, parameters_string) = Inductor(name, nodes, value)
 
-struct Capacitor{N} <: Component{N} @componentfileds end
+struct Capacitor{U} <: Component{U} @componentfileds end
 capacitor(name, nodes, value, parameters_string) = Capacitor(name, nodes, value)
 
-struct VoltageSource{N} <: Component{N} @componentfileds end
+struct VoltageSource{U} <: Component{U} @componentfileds end
 voltageSource(name, nodes, value, parameters_string) = VoltageSource(name, nodes, value)
 
-struct CurrentSource{N} <: Component{N} @componentfileds end
+struct CurrentSource{U} <: Component{U} @componentfileds end
 currentSource(name, nodes, value, parameters_string) = CurrentSource(name, nodes, value)
 
 const nodedict_type = Dict{Symbol,Int}
@@ -29,8 +29,8 @@ mutable struct ParsedCircuit{N<:Number}
     nodedict :: nodedict_type
     max_node :: Int
     max_element :: Int
-    netlist :: Vector{Component{N}}
-    ParsedCircuit{N}() where N = new("",Dict("0"=>0), 0, 0, Vector{Component{N}}())
+    netlist :: Vector{Component}
+    ParsedCircuit{N}() where N = new("",Dict("0"=>0), 0, 0, Vector{Component}())
 end
 
 struct MNA{N<:Number, T<:AbstractArray{N,2}}
