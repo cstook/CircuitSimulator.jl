@@ -1,3 +1,4 @@
+# functions to take a .net file and return a ParsedCircuit
 
 function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
     regex1 = regex = r"^([RLCVI]\S+)\s+(\S+)\s+(\S+)\s+(.*)"i
