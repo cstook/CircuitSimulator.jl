@@ -11,7 +11,9 @@
             card, nextcard = nextcard, card
         end
     end
-    @yield card
+    if iscontinueline
+        @yield card
+    end
 end
 
 function readnoncommentline(io::IO)
