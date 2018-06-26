@@ -9,6 +9,6 @@ include("types.jl")
 include("spiceunits.jl")
 include("parse_netlist.jl")
 include("readcards.jl")
-inlcude("modified_nodal_analysis.jl")
+include("modified_nodal_analysis.jl")
 
 end # module

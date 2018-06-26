@@ -1,5 +1,6 @@
 @resumable function readcards(io::IO)::String
     iscontinueline, card = cardpart(readnoncommentline(io))
+    nextcard = ""
     while ~eof(io)
         iscontinueline, nextcard = cardpart(readnoncommentline(io))
         if iscontinueline
@@ -11,6 +12,8 @@
     end
     if iscontinueline
         @yield card
+    else
+        @yield nextcard
     end
 end
 

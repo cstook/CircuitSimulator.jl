@@ -27,8 +27,8 @@ end
 
 # retain currents for group 2
 
-process!(x::MNAbuilder{T}, e::Element, forcegroup2::Bool, pc) where T = println("unknown element $(e.name)")
-function process!(x::MNAbuilder{T}, e::R, forcegroup2::Bool, pc) where T
+process!(x::MNAbuilder{T}, e::Component, forcegroup2::Bool, pc) where T = println("unknown element $(e.name)")
+function process!(x::MNAbuilder{T}, e::Resistor, forcegroup2::Bool, pc) where T
     if forcegroup2
         pc.max_node += 1
         x.currentdict[e.name] = pc.max_node
@@ -45,11 +45,11 @@ function process!(x::MNAbuilder{T}, e::R, forcegroup2::Bool, pc) where T
         pushvalue!(x.Gi,x.Gj,x.Gvalue, e.node2, e.node1, -conductance)
     end
 end
-function process!(x::MNAbuilder{T}, e::L, forcegroup2::Bool, pc) where T
+function process!(x::MNAbuilder{T}, e::Inductor, forcegroup2::Bool, pc) where T
 end
-function process!(x::MNAbuilder{T}, e::C, forcegroup2::Bool, pc) where T
+function process!(x::MNAbuilder{T}, e::Capacitor, forcegroup2::Bool, pc) where T
 end
-function process!(x::MNAbuilder{T}, e::V, ::Bool, pc)  where T # group 2 only
+function process!(x::MNAbuilder{T}, e::VoltageSource, ::Bool, pc)  where T # group 2 only
     pc.max_node += 1
     x.currentdict[e.name] = pc.max_node
     pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.node1,    one(T))
@@ -58,7 +58,7 @@ function process!(x::MNAbuilder{T}, e::V, ::Bool, pc)  where T # group 2 only
     pushvalue!(x.Gi,x.Gj,x.Gvalue, e.node2,     pc.max_node, -one(T))
     pushvalue!(x.Si,x.Sj,x.Svalue, pc.max_node, 1,           e.value)
 end
-function process!(x::MNAbuilder{T}, e::I, forcegroup2::Bool, pc) where T
+function process!(x::MNAbuilder{T}, e::CurrentSource, forcegroup2::Bool, pc) where T
     if forcegroup2
         pc.max_node += 1
         x.currentdict[e.name] = pc.max_node

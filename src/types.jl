@@ -30,7 +30,7 @@ mutable struct ParsedCircuit{N<:Number}
     max_node :: Int
     max_element :: Int
     netlist :: Vector{Component}
-    ParsedCircuit{N}() where N = new("",Dict("0"=>0), 0, 0, Vector{Component}())
+    ParsedCircuit{N}() where N = new("",Dict(Symbol(0)=>0), 0, 0, Vector{Component}())
 end
 
 struct MNA{N<:Number, T<:AbstractArray{N,2}}
