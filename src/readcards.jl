@@ -10,11 +10,8 @@
             card, nextcard = nextcard, card
         end
     end
-    if iscontinueline
-        @yield card
-    else
-        @yield nextcard
-    end
+    @yield card
+    nothing # this is nessessary, why?
 end
 
 function readnoncommentline(io::IO)
