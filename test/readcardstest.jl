@@ -48,7 +48,9 @@
     .backanno
     .end
     """)
-    for card in readcards(testbuffer)
+    testbuffercollected = collect(readcards(testbuffer))
+    @test (length(testbuffercollected)) == 9
+    for card in testbuffercollected
         @test card == readline(verified)
     end
 end;
