@@ -44,7 +44,7 @@ function update_nodedict!(pc::ParsedCircuit, node_strings)
             end
         push!(nodearray, pc.nodedict[node])
         end
-    (nodearray...)
+    nodearray
 end
 
 function parse_netlist(filename::AbstractString)

@@ -1,5 +1,5 @@
 using CircuitSimulator
-using Base.Test
+using Test
 
 include("readcardstest.jl")
 include("parsertest.jl")

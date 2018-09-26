@@ -19,7 +19,7 @@ function readnoncommentline(io::IO)
     line = ""
     while unwantedline && ~eof(io)
         line = readline(io)
-        unwantedline = ismatch(r"^\s*(?:\*)",line) || ismatch(r"^\s*$",line)
+        unwantedline = occursin(r"^\s*(?:\*)",line) || occursin(r"^\s*$",line)
     end
     return unwantedline ? "" : line
 end

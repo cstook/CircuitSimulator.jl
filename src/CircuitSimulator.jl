@@ -3,6 +3,7 @@ __precompile__()
 module CircuitSimulator
 
 using ResumableFunctions
+using CoreLogging
 
 include("def_macro.jl")
 include("types.jl")
