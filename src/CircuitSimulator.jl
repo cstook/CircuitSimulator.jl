@@ -3,7 +3,10 @@ __precompile__()
 module CircuitSimulator
 
 using ResumableFunctions
-using CoreLogging
+using Base.Meta
+using Base.CoreLogging: Debug, global_logger
+using Logging: ConsoleLogger
+global_logger(ConsoleLogger(stderr, Debug))
 
 include("def_macro.jl")
 include("types.jl")

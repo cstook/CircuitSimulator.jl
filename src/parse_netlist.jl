@@ -44,7 +44,7 @@ function update_nodedict!(pc::ParsedCircuit, node_strings)
             end
         push!(nodearray, pc.nodedict[node])
         end
-    nodearray
+    Tuple(nodearray)
 end
 
 function parse_netlist(filename::AbstractString)
@@ -62,7 +62,7 @@ function parse_netlist(io::IO, N::Type=Float64)
     pc.titleline = readline(io)
     for card in readcards(io)
         parse_2nodecomponent!(pc,card) && continue
-        warn("Not Processed: ",card)
+        @warn "Not Processed: " card
     end
     return pc
 end
@@ -85,7 +85,7 @@ function parse_spiceexpression(s)
     s = fix_spiceunits(s)
     s = fix_netvoltages(s)
     s = fix_branchcurrents(s)
-    (true,parse(s))
+    (true,Base.Meta.parse(s))
 end
 function fix_spiceunits(s)
     regex = r"(?<![a-z_])(?<value>(?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)
@@ -97,14 +97,14 @@ function fix_spiceunits(s)
     s[1:prevind(s,value_offset)] * value * stringunits[lowercase(unit)] * fix_spiceunits(s[next_offset:end])
 end
 function fix_netvoltages(s)
-    s = replace(s,r"v\(\s*(?<name>[^ ,]+)\s*\)"i,s"netvoltage(Val(Symbol(\"\g<name>\")))")
+    s = replace(s,r"v\(\s*(?<name>[^ ,]+)\s*\)"i => s"netvoltage(Val(Symbol(\"\g<name>\")))")
     regex = r"v\(\s*(?<name1>\S+)\s*,\s*(?<name2>\S+)\s*\)"i
     subex = s"netvoltage(Val(Symbol(\"\g<name1>\")))-netvoltage(Val(Symbol(\"\g<name2>\")))"
-    replace(s,regex,subex)
+    replace(s,regex => subex)
 end
 function fix_branchcurrents(s)
-    s = replace(s,r"i\(\s*(?<name>[^ ,]+)\s*\)"i,s"branchcurrent(Val(Symbol(\"\g<name>\")))")
+    s = replace(s,r"i\(\s*(?<name>[^ ,]+)\s*\)"i => s"branchcurrent(Val(Symbol(\"\g<name>\")))")
     regex = r"i\(\s*(?<name1>\S+)\s*,\s*(?<name2>\S+)\s*\)"i
     subex = s"branchcurrent(Val(Symbol(\"\g<name1>\")))-branchcurrent(Val(Symbol(\"\g<name2>\")))"
-    replace(s,regex,subex)
+    replace(s,regex => subex)
 end
