@@ -4,9 +4,6 @@ module CircuitSimulator
 
 using ResumableFunctions
 using Base.Meta
-using Base.CoreLogging: Debug, global_logger
-using Logging: ConsoleLogger
-global_logger(ConsoleLogger(stderr, Debug))
 
 
 include("def_macro.jl")
