@@ -27,7 +27,7 @@ end
 
 # retain currents for group 2
 
-process!(x::MNAbuilder{T}, e::Component, forcegroup2::Bool, pc) where T = println("unknown element $(e.name)")
+process!(x::MNAbuilder{T}, e::Component, forcegroup2::Bool, pc) where T = @warn "unknown element" element=(e.name)
 function process!(x::MNAbuilder{T}, e::Resistor, forcegroup2::Bool, pc) where T
     if forcegroup2
         pc.max_node += 1
