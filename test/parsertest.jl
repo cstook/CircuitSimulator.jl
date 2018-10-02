@@ -14,7 +14,8 @@ using CircuitSimulator: ParsedCircuit, MNA, MNAbuilder,
     I1 2 b 3
     Z4 z x 45 \$ not a valid part
     """)
-    pc = parse_netlist(netlist1) # add @test_warn here someday
+
+    pc = @test_logs (:warn, "Not Processed: ") parse_netlist(netlist1)
     @test pc.titleline == "Hello World"
     @test pc.nodedict==nodedict_type(Symbol("a")=>1,Symbol("b")=>2,Symbol(1)=>3,Symbol(2)=>4,Symbol(0)=>0)
     @test pc.max_node == maximum(collect(values(pc.nodedict)))
