@@ -47,10 +47,11 @@ function update_nodedict!(pc::ParsedCircuit, node_strings)
     Tuple(nodearray)
 end
 
-function parse_netlist(filename::AbstractString)
+function parse_netlist(filename::AbstractString, N::Type=Float64)
     io = open(filename)
+    pc = nothing
     try
-        pc = parse_netlist(io)
+        pc = parse_netlist(io,N)
     finally
         close(io)
     end

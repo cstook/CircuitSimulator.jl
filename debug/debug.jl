@@ -1,16 +1,13 @@
-using CircuitSimulator: parse_netlist
 
-using Base.CoreLogging: Debug, global_logger
+using Base.CoreLogging: Debug, global_logger, with_logger
 using Logging: ConsoleLogger
-global_logger(ConsoleLogger(stderr, Debug))
+using CircuitSimulator: parse_netlist, mna
 
+function debugMNA(f)
+    pc = parse_netlist("debug/f4r2.net")
+    m = mna(pc)
+end
 
-netlist2=IOBuffer(
-"""netlist2
-R1 a b 10k + V(a) + V(b,1)
-R1 a b 10k + V(a) + V(b,1) a = 1 b = 34
-R1 a b 10k + V(a) + V(b,1) a 1 b 34
-R1 c d I(R1) - 7.9megOhm
-""")
-pc2 = parse_netlist(netlist2)
-@debug "parsed netlist 2" pc2
+with_logger(ConsoleLogger(stderr, Debug)) do
+    debugMNA("debug/f4r2.net")
+end

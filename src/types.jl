@@ -5,7 +5,7 @@
     value :: U
 end
 
-abstract type Component{U<:Union{Expr,Number}} end
+abstract type Component{U<:Union{Function,Number}} end
 
 struct Resistor{U} <: Component{U} @componentfileds end
 resistor(name, nodes, value, parameters_string) = Resistor(name, nodes, value)
@@ -51,6 +51,19 @@ struct MNA{N<:Number, T<:AbstractArray{N,2}}
         new{N,T}(G,H,g,D,S,s,nodedict,currentdict)
     end
 end
+
+#=
+G*x(t) + H*g(x) + D*x'(t) = s(t)
+
+G = MNA system matrix, constant matrix (linear resitors)
+H = elements are either -1,0,+1
+g(x) = vector of nonlinear element functions
+D = constant matrix from L,C
+H2 = elements are either -1,0,+1 not included yet
+d(x) = nonlinear L,C, not included yet
+S = constant source vector
+s = nonlinear source vector
+=#
 
 struct MNAbuilder{N<:Number}
     Gi :: Vector{Int}
