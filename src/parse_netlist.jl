@@ -98,14 +98,14 @@ function fix_spiceunits(s)
     s[1:prevind(s,value_offset)] * value * stringunits[lowercase(unit)] * fix_spiceunits(s[next_offset:end])
 end
 function fix_netvoltages(s)
-    s = replace(s,r"v\(\s*(?<name>[^ ,]+)\s*\)"i => s"netvoltage(Val(Symbol(\"\g<name>\")))")
-    regex = r"v\(\s*(?<name1>\S+)\s*,\s*(?<name2>\S+)\s*\)"i
-    subex = s"netvoltage(Val(Symbol(\"\g<name1>\")))-netvoltage(Val(Symbol(\"\g<name2>\")))"
+    s = replace(s,r"v\(\s*(?<name>[^ ,)]+)\s*\)"i => s"netvoltage(Val(Symbol(\"\g<name>\")))")
+    regex = r"v\(\s*(?<name1>[^ ,)]+)\s*,\s*(?<name2>[^ ,)]+)\s*\)"i
+    subex = s"netvoltage(Val(Symbol(\"\g<name2>\")))-netvoltage(Val(Symbol(\"\g<name1>\")))"
     replace(s,regex => subex)
 end
 function fix_branchcurrents(s)
-    s = replace(s,r"i\(\s*(?<name>[^ ,]+)\s*\)"i => s"branchcurrent(Val(Symbol(\"\g<name>\")))")
-    regex = r"i\(\s*(?<name1>\S+)\s*,\s*(?<name2>\S+)\s*\)"i
-    subex = s"branchcurrent(Val(Symbol(\"\g<name1>\")))-branchcurrent(Val(Symbol(\"\g<name2>\")))"
+    s = replace(s,r"i\(\s*(?<name>[^ ,)]+)\s*\)"i => s"branchcurrent(Val(Symbol(\"\g<name>\")))")
+    regex = r"i\(\s*(?<name1>[^ ,)]+)\s*,\s*(?<name2>[^ ,)]+)\s*\)"i
+    subex = s"branchcurrent(Val(Symbol(\"\g<name2>\")))-branchcurrent(Val(Symbol(\"\g<name1>\")))"
     replace(s,regex => subex)
 end

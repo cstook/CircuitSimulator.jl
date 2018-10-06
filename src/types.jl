@@ -5,7 +5,7 @@
     value :: U
 end
 
-abstract type Component{U<:Union{Function,Number}} end
+abstract type Component{U<:Union{Expr,Number}} end
 
 struct Resistor{U} <: Component{U} @componentfileds end
 resistor(name, nodes, value, parameters_string) = Resistor(name, nodes, value)
@@ -54,6 +54,7 @@ end
 
 #=
 G*x(t) + H*g(x) + D*x'(t) = s(t)
+
 
 G = MNA system matrix, constant matrix (linear resitors)
 H = elements are either -1,0,+1
