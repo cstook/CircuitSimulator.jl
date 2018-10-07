@@ -3,6 +3,7 @@ __precompile__()
 module CircuitSimulator
 
 using ResumableFunctions
+using SparseArrays
 using Base.Meta
 
 

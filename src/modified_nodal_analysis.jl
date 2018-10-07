@@ -45,11 +45,11 @@ function process!(x::MNAbuilder{T}, e::Resistor, forcegroup2::Bool, pc) where T
         pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[2], e.nodes[1], -conductance)
     end
 end
-function process!(x::MNAbuilder{T}, e::Inductor, forcegroup2::Bool, pc) where T
+function process!(x::MNAbuilder{T}, e::Inductor, forcegroup2::Bool, pc) where T<:Number
 end
-function process!(x::MNAbuilder{T}, e::Capacitor, forcegroup2::Bool, pc) where T
+function process!(x::MNAbuilder{T}, e::Capacitor, forcegroup2::Bool, pc) where T<:Number
 end
-function process!(x::MNAbuilder{T}, e::VoltageSource, ::Bool, pc)  where T # group 2 only
+function process!(x::MNAbuilder{T}, e::VoltageSource, ::Bool, pc)  where T<:Number # group 2 only
     pc.max_node += 1
     x.currentdict[e.name] = pc.max_node
     pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[1],    one(T))
@@ -58,7 +58,7 @@ function process!(x::MNAbuilder{T}, e::VoltageSource, ::Bool, pc)  where T # gro
     pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[2],     pc.max_node, -one(T))
     pushvalue!(x.Si,x.Sj,x.Svalue, pc.max_node, 1,           e.value)
 end
-function process!(x::MNAbuilder{T}, e::CurrentSource, forcegroup2::Bool, pc) where T
+function process!(x::MNAbuilder{T}, e::CurrentSource, forcegroup2::Bool, pc) where T<:Number
     if forcegroup2
         pc.max_node += 1
         x.currentdict[e.name] = pc.max_node
@@ -91,5 +91,6 @@ end
 function pushvalue!(x::MNAbuilder{N}, i, j, value::Expr) where N<:Number
     if i>0 && j>0
         # push! into H and g(x)
+        @debug value
     end
 end
