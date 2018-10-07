@@ -16,7 +16,7 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
         value_string = restofline[1:m.offsets[1]]
         parameters_string = restofline[nextind(line,m.offsets[1]):end]
     end
-    value = parse_spiceexpression(N, value_string)
+    value = parse_constant_spicevalue(N, value_string)
     nodes = update_nodedict!(pc, node_strings)
     if line[1] == 'R'
         newcomponent = resistor(name, nodes, value, parameters_string)
@@ -66,6 +66,10 @@ function parse_netlist(io::IO, N::Type=Float64)
         @warn "Not Processed: " card
     end
     return pc
+end
+
+function parse_constant_spicevalue(N,s)
+    (value = parse_spicevalue(N,s)) != nothing ? value : s
 end
 
 function parse_spiceexpression(N,s)

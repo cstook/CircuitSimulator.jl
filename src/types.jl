@@ -29,8 +29,9 @@ mutable struct ParsedCircuit{N<:Number}
     nodedict :: nodedict_type
     max_node :: Int
     max_element :: Int
-    netlist :: Vector{Component{Union{N,String}}}
-    ParsedCircuit{N}() where N = new("",Dict(Symbol(0)=>0), 0, 0, Vector{Component{Union{N,String}}}())
+    netlist :: Vector{Component}
+    ParsedCircuit{N}() where N<:Number =
+        new("",Dict(Symbol(0)=>0), 0, 0, Vector{Component}())
 end
 
 struct MNA{N<:Number, M<:AbstractArray, V<:AbstractArray}
@@ -45,14 +46,14 @@ struct MNA{N<:Number, M<:AbstractArray, V<:AbstractArray}
     nodedict :: nodedict_type
     currentdict :: nodedict_type #cannot use spase vector here, zero(::Function) is undefined
     function MNA{N,M,V}(G,H,g,D,H2,d,S,s,nodedict,currentdict) where {N,M,V}
-        @assert ndims(G) = 2 "G must have 2 dimensions"
-        @assert ndims(H) = 2 "H must have 2 dimensions"
-        @assert ndims(D) = 2 "D must have 2 dimensions"
-        @assert ndims(H2) = 2 "H2 must have 2 dimensions"
-        @assert ndims(g) = 1 "g must have 1 dimensions"
-        @assert ndims(D) = 1 "D must have 1 dimensions"
-        @assert ndims(S) = 1 "S must have 1 dimensions"
-        @assert ndims(s) = 1 "s must have 1 dimensions"
+        @assert ndims(G) == 2 "G must have 2 dimensions"
+        @assert ndims(H) == 2 "H must have 2 dimensions"
+        @assert ndims(D) == 2 "D must have 2 dimensions"
+        @assert ndims(H2) == 2 "H2 must have 2 dimensions"
+        @assert ndims(g) == 1 "g must have 1 dimensions"
+        @assert ndims(D) == 1 "D must have 1 dimensions"
+        @assert ndims(S) == 1 "S must have 1 dimensions"
+        @assert ndims(s) == 1 "s must have 1 dimensions"
         @assert begin (Gy,Gx) = size(G); Gy==Gx end "G not square"
         @assert begin (Hy,Hx) = size(H); Hx==length(g) end "H,g mismatch $(size(H)), $(length(g))"
         @assert begin (Dy,Dx) = size(D); Dy==Dx end "D not square"
