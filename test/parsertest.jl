@@ -1,4 +1,4 @@
-using CircuitSimulator: ParsedCircuit, MNA, MNAbuilder,
+using CircuitSimulator: ParsedCircuit, MNA,
                         parse_netlist,nodedict_type, Resistor,
                         Inductor,Capacitor, CurrentSource, VoltageSource
 @testset "parser Tests" begin
@@ -33,4 +33,19 @@ using CircuitSimulator: ParsedCircuit, MNA, MNAbuilder,
     R1 c d I(R1) - 7.9megOhm
     """)
     pc2 = parse_netlist(netlist2)
+
+    netlist3=IOBuffer(
+    """
+    \$ Example from p131
+    \$
+
+    Vs 0 1 2
+    Vd1 1 2 1.52e-9*exp( V(2,1)/(1.752*0.5)-1 )  \$ 1N914 Is = 1.52e-9, n=1.752, Vt=0.5 ?
+    R1 2 0 1
+    R3 2 3 1
+    Vr2 3 0 I(2)^3*(I(2)-1) \$ R2
+    R4 1 3 1
+    """
+    )
+    pc3 = parse_netlist(netlist3)
 end
