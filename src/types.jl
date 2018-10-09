@@ -22,12 +22,12 @@ voltageSource(name, nodes, value, parameters_string) = VoltageSource(name, nodes
 struct CurrentSource{ValueType} <: Component{ValueType} @componentfileds end
 currentSource(name, nodes, value, parameters_string) = CurrentSource(name, nodes, value)
 
-const NodeDictType = Dict{Symbol,Int}
+const NameDict = Dict{Symbol,Int}
 const Group2Type = Set{Symbol}
 
 mutable struct ParsedCircuit{N<:Number}
     titleline :: String
-    nodedict :: NodeDictType
+    group1Names :: NameDict
     group2 :: Group2Type
     max_node :: Int
     max_element :: Int
@@ -61,9 +61,9 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
     d :: V
     S :: V2
     s :: V3
-    nodedict :: NodeDictType
-    group2 :: Group2Type
-    function MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,nodedict,group2) where {M,M2,V,V2,V3}
+    group1Names :: NameDict
+    group2Names :: NameDict
+    function MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names) where {M,M2,V,V2,V3}
         @assert ndims(G) == 2 "G must have 2 dimensions"
         @assert ndims(H) == 2 "H must have 2 dimensions"
         @assert ndims(D) == 2 "D must have 2 dimensions"
@@ -72,7 +72,7 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
         @assert ndims(d) == 1 "d must have 1 dimensions"
         @assert ndims(S) == 1 "S must have 1 dimensions"
         @assert ndims(s) == 1 "s must have 1 dimensions"
-        y = length(nodedict) + length(group2)
+        y = length(group1Names) + length(group2)
         (Gy,Gx) = size(G)
         @assert Gy==Gx "G not square $Gx x $Gy"
         @assert Gy==y "G wrong size $Gy, should be $y"
@@ -87,12 +87,12 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
         if ~(Gy==Gx==Hy==Dy==Dx==H2y==length(S)==length(s))
             throw(DimensionMismatch())
         end
-        new(G,H,g,D,H2,d,S,s,nodedict,group2)
+        new(G,H,g,D,H2,d,S,s,group1Names,group2Names)
     end
 end
 MNA(G::M, H::M2, g::V, D::M, H2::M2,
-    d::V, S::V2, s::V3, nodedict, group2) where {M,M2,V,V2,V3} =
-        MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,nodedict,group2)
+    d::V, S::V2, s::V3, group1Names, group2Names) where {M,M2,V,V2,V3} =
+        MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
 
 
 #=
@@ -114,8 +114,8 @@ struct MNAbuilder{N<:Number, NonlinearExpressions<:AbstractArray}
     Si :: Vector{Int}
     Svalue :: Vector{N}
     s :: NonlinearExpressions # SparseVector?
-    nodedict :: NodeDictType
-    currentdict :: NodeDictType
+    group1Names :: NameDict
+    currentdict :: NameDict
     MNAbuilder{N}(l) where {N<:Number} =
         new([],[],[],   # G
             [],         # g

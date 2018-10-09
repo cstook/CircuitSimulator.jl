@@ -8,9 +8,9 @@
 # parsing expressions.
 # could be fixed by only allowing current measurment at voltage sources.
 function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
-    mnaNodeDict = copy(pc.nodedict)
+    mnagroup1Names = copy(pc.group1Names)
     mnaGroup2 = union(group2,pc.group2)
-    y = length(mnaNodeDict) + length(mnaGroup2)
+    y = length(mnagroup1Names) + length(mnaGroup2)
     G = spzeros(N, y, y)
     H = spzeros(Int8, y, pc.length_g)
     g = Array{Function}(undef, pc.length_g)
@@ -19,15 +19,20 @@ function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     d = Array{Function}(undef, pc.length_d)
     S = spzeros(N, y)
     s = spzeros(Function, y)
-    x = MNA(G,H,g,D,H2,d,S,s,mnaNodeDict,mnaGroup2)
+    stateNames = copy(mnagroup1Names)
+    i = pc.max_node+1
+    for  name in mnaGroup2
+
+    end
+    x = MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,mnaGroup2)
 
 end
 
 
 function mna______(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     x = MNAbuilder{N}()
-    for (key,value) in pc.nodedict
-        x.nodedict[key] = value
+    for (key,value) in pc.group1Names
+        x.group1Names[key] = value
     end
     for i in eachindex(pc.netlist)
         element = pc.netlist[i]

@@ -17,7 +17,7 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
         parameters_string = restofline[nextind(line,m.offsets[1]):end]
     end
     value = parse_constant_spicevalue(N, value_string)
-    nodes = update_nodedict!(pc, node_strings)
+    nodes = update_group1Names!(pc, node_strings)
     if line[1] == 'R'
         newcomponent = resistor(name, nodes, value, parameters_string)
         increment_length_g(pc,value)
@@ -49,15 +49,15 @@ function increment_length_g(pc::ParsedCircuit, ::AbstractString)
     pc.length_g += 1
 end
 
-function update_nodedict!(pc::ParsedCircuit, node_strings)
+function update_group1Names!(pc::ParsedCircuit, node_strings)
     nodearray = Vector{Int}()
         for node_string in node_strings
             node = Symbol(node_string)
-            if ~(node ∈ keys(pc.nodedict))
+            if ~(node ∈ keys(pc.group1Names))
                 pc.max_node +=1
-                pc.nodedict[node]=pc.max_node
+                pc.group1Names[node]=pc.max_node
             end
-        push!(nodearray, pc.nodedict[node])
+        push!(nodearray, pc.group1Names[node])
         end
     Tuple(nodearray)
 end
