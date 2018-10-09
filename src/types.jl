@@ -72,7 +72,7 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
         @assert ndims(d) == 1 "d must have 1 dimensions"
         @assert ndims(S) == 1 "S must have 1 dimensions"
         @assert ndims(s) == 1 "s must have 1 dimensions"
-        y = length(group1Names) + length(group2)
+        y = length(group1Names) + length(group2Names)
         (Gy,Gx) = size(G)
         @assert Gy==Gx "G not square $Gx x $Gy"
         @assert Gy==y "G wrong size $Gy, should be $y"

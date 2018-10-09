@@ -21,10 +21,12 @@ function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     s = spzeros(Function, y)
     stateNames = copy(mnagroup1Names)
     i = pc.max_node+1
+    group2Names = Dict{Symbol,Int}()
     for  name in mnaGroup2
-
+        group2Names[name] = i
+        i+=1
     end
-    x = MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,mnaGroup2)
+    x = MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,group2Names)
 
 end
 
