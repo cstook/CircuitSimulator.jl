@@ -20,18 +20,33 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
     nodes = update_nodedict!(pc, node_strings)
     if line[1] == 'R'
         newcomponent = resistor(name, nodes, value, parameters_string)
+        increment_length_g(pc,value)
     elseif line[1] == 'C'
         newcomponent = capacitor(name, nodes, value, parameters_string)
+        increment_length_d(pc,value)
     elseif line[1] =='L'
         newcomponent = inductor(name, nodes, value, parameters_string)
+        increment_length_d(pc,value)
     elseif line[1] =='V'
         newcomponent = voltageSource(name, nodes, value, parameters_string)
+        increment_length_g(pc,value)
+        push!(pc.group2,name)
     elseif line[1] =='I'
         newcomponent = currentSource(name, nodes, value, parameters_string)
+        increment_length_g(pc,value)
     end
     pc.max_element +=1
     push!(pc.netlist, newcomponent)
     return true
+end
+
+increment_length_d(::ParsedCircuit, ::Any) = nothing
+function increment_length_d(pc::ParsedCircuit, ::AbstractString)
+    pc.length_d += 1
+end
+increment_length_g(::ParsedCircuit, ::Any) = nothing
+function increment_length_g(pc::ParsedCircuit, ::AbstractString)
+    pc.length_g += 1
 end
 
 function update_nodedict!(pc::ParsedCircuit, node_strings)

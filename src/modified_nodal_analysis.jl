@@ -1,16 +1,6 @@
 # functions to build MNA from parsed circuit
 #
 
-function system_matrix_size(x::MNAbuilder)
-    mx(a) = length(a) == 0 ? 0 : maximum(a) # allow for size 0
-    maximum((mx(x.Gi), mx(x.Gj),
-            mx(x.Hi),
-            mx(x.Di), mx(x.Dj),
-            mx(x.Si),
-            mx(keys(x.s)) )
-            )
-end
-
 
 # group 2 strategy:
 # ignore currents for current controled elements for now.
@@ -21,20 +11,20 @@ function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     mnaNodeDict = copy(pc.nodedict)
     mnaGroup2 = union(group2,pc.group2)
     y = length(mnaNodeDict) + length(mnaGroup2)
-    G = spzeros(N,y,y)
-    H = spzeros(Int8,pc.length_g,y)
-    g = Array{Function}(undef,length_g)
-    D = spzeros(N,y,y)
-    H2 = spzeros(Int8,pc.length_d,y)
-    d = Array{Function}(undef,length_h)
-    S = spzeros(N,y)
-    s = spzeros(Function,y)
+    G = spzeros(N, y, y)
+    H = spzeros(Int8, y, pc.length_g)
+    g = Array{Function}(undef, pc.length_g)
+    D = spzeros(N, y, y)
+    H2 = spzeros(Int8, y, pc.length_d)
+    d = Array{Function}(undef, pc.length_d)
+    S = spzeros(N, y)
+    s = spzeros(Function, y)
     x = MNA(G,H,g,D,H2,d,S,s,mnaNodeDict,mnaGroup2)
 
 end
 
 
-function mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
+function mna______(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     x = MNAbuilder{N}()
     for (key,value) in pc.nodedict
         x.nodedict[key] = value
@@ -50,6 +40,7 @@ end
 
 # retain currents for group 2, voltage sources and anything else we want currents for
 
+#=
 process!(x::MNAbuilder{T}, e::Component, forcegroup2::Bool, pc) where T = @warn "unknown element" element=(e.name)
 function process!(x::MNAbuilder{T}, e::Resistor, forcegroup2::Bool, pc) where T
     if forcegroup2
@@ -117,3 +108,4 @@ function pushvalue!(x::MNAbuilder{N}, i, j, value::Expr) where N<:Number
         @debug value
     end
 end
+=#

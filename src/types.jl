@@ -35,7 +35,7 @@ mutable struct ParsedCircuit{N<:Number}
     length_d :: Int
     netlist :: Vector{Component}
     ParsedCircuit{N}() where N<:Number =
-        new("",Dict(Symbol(0)=>0),(),0,0,0,0,Vector{Component}())
+        new("",Dict(Symbol(0)=>0),Group2Type(),0,0,0,0,Vector{Component}())
 end
 
 
@@ -52,7 +52,7 @@ d(x) = nonlinear L,C, not included yet
 S = constant source vector
 s = nonlinear source vector
 =#
-struct MNA{N<:Number, M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractArray, V3<:AbstractArray}
+struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractArray, V3<:AbstractArray}
     G :: M
     H :: M2
     g :: V
@@ -63,13 +63,13 @@ struct MNA{N<:Number, M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<
     s :: V3
     nodedict :: NodeDictType
     group2 :: Group2Type
-    function MNA{N,M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,nodedict,currentdict) where {N,M,M2,V,V2,V3}
+    function MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,nodedict,group2) where {M,M2,V,V2,V3}
         @assert ndims(G) == 2 "G must have 2 dimensions"
         @assert ndims(H) == 2 "H must have 2 dimensions"
         @assert ndims(D) == 2 "D must have 2 dimensions"
         @assert ndims(H2) == 2 "H2 must have 2 dimensions"
         @assert ndims(g) == 1 "g must have 1 dimensions"
-        @assert ndims(D) == 1 "D must have 1 dimensions"
+        @assert ndims(d) == 1 "d must have 1 dimensions"
         @assert ndims(S) == 1 "S must have 1 dimensions"
         @assert ndims(s) == 1 "s must have 1 dimensions"
         y = length(nodedict) + length(group2)
@@ -91,8 +91,8 @@ struct MNA{N<:Number, M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<
     end
 end
 MNA(G::M, H::M2, g::V, D::M, H2::M2,
-    d::V, S::V2, s::V2, V3, nodedict, group2) where {N,M,M2,V,V2,V3} =
-        MNA(G,H,g,D,H2,d,S,s,nodedict,group2)
+    d::V, S::V2, s::V3, nodedict, group2) where {M,M2,V,V2,V3} =
+        MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,nodedict,group2)
 
 
 #=
