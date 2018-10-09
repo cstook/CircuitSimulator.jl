@@ -1,5 +1,5 @@
 using CircuitSimulator: ParsedCircuit, MNA,
-                        parse_netlist,nodedict_type, Resistor,
+                        parse_netlist,NodeDictType, Resistor,
                         Inductor,Capacitor, CurrentSource, VoltageSource
 @testset "parser Tests" begin
     @test typeof(ParsedCircuit{Float64}()) == ParsedCircuit{Float64}
@@ -16,7 +16,7 @@ using CircuitSimulator: ParsedCircuit, MNA,
 
     pc = @test_logs (:warn, "Not Processed: ") parse_netlist(netlist1)
     @test pc.titleline == "Hello World"
-    @test pc.nodedict==nodedict_type(Symbol("a")=>1,Symbol("b")=>2,Symbol(1)=>3,Symbol(2)=>4,Symbol(0)=>0)
+    @test pc.nodedict==NodeDictType(Symbol("a")=>1,Symbol("b")=>2,Symbol(1)=>3,Symbol(2)=>4,Symbol(0)=>0)
     @test pc.max_node == maximum(collect(values(pc.nodedict)))
     @test pc.netlist[1] == Resistor(:R1,(1,2),10.0e3)
     @test pc.netlist[2] == Resistor(:R2,(1,0),10.0)
@@ -43,7 +43,7 @@ using CircuitSimulator: ParsedCircuit, MNA,
     Vd1 1 2 1.52e-9*exp( V(2,1)/(1.752*0.5)-1 )  \$ 1N914 Is = 1.52e-9, n=1.752, Vt=0.5 ?
     R1 2 0 1
     R3 2 3 1
-    Vr2 3 0 I(2)^3*(I(2)-1) \$ R2
+    Vr2 3 0 I(Vr2)^3*(I(Vr2)-1) \$ R2
     R4 1 3 1
     """
     )

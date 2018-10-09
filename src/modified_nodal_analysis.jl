@@ -11,7 +11,30 @@ function system_matrix_size(x::MNAbuilder)
             )
 end
 
-function mna(pc::ParsedCircuit{N}, group2 = Set{Symbol}()) where N<:Number
+
+# group 2 strategy:
+# ignore currents for current controled elements for now.
+# this allows the size of the MNA matrix to be determined without
+# parsing expressions.
+# could be fixed by only allowing current measurment at voltage sources.
+function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
+    mnaNodeDict = copy(pc.nodedict)
+    mnaGroup2 = union(group2,pc.group2)
+    y = length(mnaNodeDict) + length(mnaGroup2)
+    G = spzeros(N,y,y)
+    H = spzeros(Int8,pc.length_g,y)
+    g = Array{Function}(undef,length_g)
+    D = spzeros(N,y,y)
+    H2 = spzeros(Int8,pc.length_d,y)
+    d = Array{Function}(undef,length_h)
+    S = spzeros(N,y)
+    s = spzeros(Function,y)
+    x = MNA(G,H,g,D,H2,d,S,s,mnaNodeDict,mnaGroup2)
+
+end
+
+
+function mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     x = MNAbuilder{N}()
     for (key,value) in pc.nodedict
         x.nodedict[key] = value
@@ -25,7 +48,7 @@ function mna(pc::ParsedCircuit{N}, group2 = Set{Symbol}()) where N<:Number
 end
 
 
-# retain currents for group 2
+# retain currents for group 2, voltage sources and anything else we want currents for
 
 process!(x::MNAbuilder{T}, e::Component, forcegroup2::Bool, pc) where T = @warn "unknown element" element=(e.name)
 function process!(x::MNAbuilder{T}, e::Resistor, forcegroup2::Bool, pc) where T

@@ -28,4 +28,23 @@ Vector{N}()
 
 
 
-a = spzeros(100,100)
+a = spzeros(Float32,100,100)
+
+d = Dict(1=>"A")
+e = d
+e[6] = "B"
+f = copy(d)
+f[8] = "F"
+f
+d
+
+struct A{T,U}
+    a::T
+    b::U
+    function A{T,U}(a,b) where {T,U}
+        new(a,b)
+    end
+end
+A(a::T,b::U) where {T,U}= A{T,U}(a,b)
+
+A(1,"d")
