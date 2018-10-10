@@ -61,8 +61,8 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
     d :: V
     S :: V2
     s :: V3
-    group1Names :: NameDict
-    group2Names :: NameDict
+    group1Names :: NameDict # nodes
+    group2Names :: NameDict # components
     function MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names) where {M,M2,V,V2,V3}
         @assert ndims(G) == 2 "G must have 2 dimensions"
         @assert ndims(H) == 2 "H must have 2 dimensions"

@@ -3,11 +3,16 @@
 
 
 # group 2 strategy:
-# ignore currents for current controled elements for now.
+# ignore currents for current controled components for now.
 # this allows the size of the MNA matrix to be determined without
 # parsing expressions.
 # could be fixed by only allowing current measurment at voltage sources.
 function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
+    x = blankmna(pc,group2)
+    processnetlist!(x,pc)
+end
+
+function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     mnagroup1Names = copy(pc.group1Names)
     mnaGroup2 = union(group2,pc.group2)
     y = length(mnagroup1Names) + length(mnaGroup2)
@@ -26,25 +31,21 @@ function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
         group2Names[name] = i
         i+=1
     end
-    x = MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,group2Names)
-
+    MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,group2Names)
 end
 
-
-function mna______(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
-    x = MNAbuilder{N}()
-    for (key,value) in pc.group1Names
-        x.group1Names[key] = value
+function processnetlist(x::MNA, pc::ParsedCircuit{N})  where N<:Number
+    for component ∈ pc.netlist
+        addstamp!(x, component, component∈keys(x.group2Names))
     end
-    for i in eachindex(pc.netlist)
-        element = pc.netlist[i]
-        forcegroup2 =  element.name ∈ group2
-        process!(x, element, forcegroup2, pc)
-    end
-    MNA(x,pc.max_node)
 end
 
-
+addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component $c"
+function addstamp!(x::MNA, c::Resistor, g2::Bool)
+    if g2
+    else
+    end
+end
 # retain currents for group 2, voltage sources and anything else we want currents for
 
 #=
