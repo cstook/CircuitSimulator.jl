@@ -93,38 +93,3 @@ end
 MNA(G::M, H::M2, g::V, D::M, H2::M2,
     d::V, S::V2, s::V3, group1Names, group2Names) where {M,M2,V,V2,V3} =
         MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
-
-
-#=
-struct MNAbuilder{N<:Number, NonlinearExpressions<:AbstractArray}
-    Gi :: Vector{Int}
-    Gj :: Vector{Int}
-    Gvalue :: Vector{N}
-    g :: NonlinearExpressions  # SparseVector?
-    Hi :: Vector{Int}
-    Hj :: Vector{Int}
-    Hvalue :: Vector{Int8}
-    Di :: Vector{Int}
-    Dj :: Vector{Int}
-    Dvalue :: Vector{N}
-    H2i :: Vector{Int}
-    H2j :: Vector{Int}
-    H2value :: Vector{Int8}
-    d :: NonlinearExpressions # SparseVector?
-    Si :: Vector{Int}
-    Svalue :: Vector{N}
-    s :: NonlinearExpressions # SparseVector?
-    group1Names :: NameDict
-    currentdict :: NameDict
-    MNAbuilder{N}(l) where {N<:Number} =
-        new([],[],[],   # G
-            [],         # g
-            [],[],[],   # H
-            [],[],[],   # D
-            [],[],[],   # H2
-            [],         # d
-            [],[],      # S
-            [],         # s
-            [],Dict(),Dict())
-end
-=#

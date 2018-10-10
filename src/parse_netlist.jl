@@ -86,12 +86,6 @@ end
 function parse_constant_spicevalue(N,s)
     (value = parse_spicevalue(N,s)) != nothing ? value : s
 end
-
-function parse_spiceexpression(N,s)
-    (value = parse_spicevalue(N,s)) != nothing && return value
-    done, expression = parse_spiceexpression(s); done && return expression
-    throw(ErrorException("Could Not Process: $s"))
-end
 function parse_spicevalue(N,s)
     m = match(r"^\s*((?:[0-9]+(?:[.][0-9]*)?|[.][0-9]+)(?:[e][-+]?[0-9]+)?)
                 (k|meg|mil|g|t|m|u|μ|n|p|f){0,1}[a-z0-9_.]*\s*$"ix,s)
@@ -101,6 +95,19 @@ function parse_spicevalue(N,s)
     unitstring === nothing || (value *= N(units[lowercase(unitstring)]))
     return value
 end
+
+
+
+
+
+
+
+function parse_spiceexpression(N,s)
+    (value = parse_spicevalue(N,s)) != nothing && return value
+    done, expression = parse_spiceexpression(s); done && return expression
+    throw(ErrorException("Could Not Process: $s"))
+end
+
 function parse_spiceexpression(s)
     s = fix_spiceunits(s)
     s = fix_netvoltages(s)

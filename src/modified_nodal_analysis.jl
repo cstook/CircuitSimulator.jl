@@ -34,86 +34,103 @@ function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,group2Names)
 end
 
-function processnetlist(x::MNA, pc::ParsedCircuit{N})  where N<:Number
+function processnetlist!(x::MNA, pc::ParsedCircuit{N})  where N<:Number
     for component ∈ pc.netlist
-        addstamp!(x, component, component∈keys(x.group2Names))
+        addstamp!(x, component, component.name∈keys(x.group2Names))
     end
 end
 
-addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component $c"
-function addstamp!(x::MNA, c::Resistor, g2::Bool)
-    if g2
-    else
-    end
-end
+
 # retain currents for group 2, voltage sources and anything else we want currents for
-
-#=
-process!(x::MNAbuilder{T}, e::Component, forcegroup2::Bool, pc) where T = @warn "unknown element" element=(e.name)
-function process!(x::MNAbuilder{T}, e::Resistor, forcegroup2::Bool, pc) where T
-    if forcegroup2
-        pc.max_node += 1
-        x.currentdict[e.name] = pc.max_node
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[1],     pc.max_node,    one(T))
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[2],     pc.max_node,    -one(T))
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[1],        one(T))
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[1],        -one(T))
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, pc.max_node,    e.value)
+addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component $c"
+function addstamp!(x::MNA, c::Resistor{T}, g2::Bool) where T<:Number
+    vp = c.nodes[2]
+    vn = c.nodes[1]
+    if g2
+        if vp!=0
+            x.G[i,vp] += +1
+            x.G[vp,i] += +1
+        end
+        if vn!=0
+            x.G[i,vn] += -1
+            x.G[vn,i] += -1
+        end
+        i = x.group2Names[c.name]
+        x.G[i,i] += c.value
     else
-        conductance = 1/e.value
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[1], e.nodes[1], conductance)
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[2], e.nodes[2], conductance)
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[1], e.nodes[2], -conductance)
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[2], e.nodes[1], -conductance)
+        g = inv(c.value)
+        if vp!=0
+            x.G[vp,vp] += +g
+        end
+        if vn!=0
+            x.G[vn,vn] += +g
+            if vp!=0
+                x.G[vp,vn] += -g
+                x.G[vn,vp] += -g
+            end
+        end
     end
 end
-function process!(x::MNAbuilder{T}, e::Inductor, forcegroup2::Bool, pc) where T<:Number
+function addstamp!(x::MNA, c::Resistor{T}, g2::Bool) where T<:AbstractString
 end
-function process!(x::MNAbuilder{T}, e::Capacitor, forcegroup2::Bool, pc) where T<:Number
-end
-function process!(x::MNAbuilder{T}, e::VoltageSource, ::Bool, pc)  where T<:Number # group 2 only
-    pc.max_node += 1
-    x.currentdict[e.name] = pc.max_node
-    pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[1],    one(T))
-    pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[2],    -one(T))
-    pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[1],     pc.max_node, one(T))
-    pushvalue!(x.Gi,x.Gj,x.Gvalue, e.nodes[2],     pc.max_node, -one(T))
-    pushvalue!(x.Si,x.Sj,x.Svalue, pc.max_node, 1,           e.value)
-end
-function process!(x::MNAbuilder{T}, e::CurrentSource, forcegroup2::Bool, pc) where T<:Number
-    if forcegroup2
-        pc.max_node += 1
-        x.currentdict[e.name] = pc.max_node
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[1]     , one(T))
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, e.nodes[2]     , -one(T))
-        pushvalue!(x.Gi,x.Gj,x.Gvalue, pc.max_node, pc.max_node , one(T))
-        pushvalue!(x.Si,x.Sj,x.Svalue, ps.max_node, 1           , e.value)
+
+function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:Number
+    vp = c.nodes[2]
+    vn = c.nodes[1]
+    if g2
+        i = x.group2Names[c.name]
+        if vp!=0
+            x.G[i,vp] += +1
+            x.G[vp,i] += +1
+        end
+        if vn!=0
+            x.G[i,vn] += -1
+            x.G[vn,i] += -1
+        end
+        x.S[i] += c.value
     else
-        pushvalue!(x.Si,x.Sj,x.Svalue, e.nodes[1], 1, -e.value)
-        pushvalue!(x.Si,x.Sj,x.Svalue, e.nodes[2], 1, e.value)
+        throw(ErrorException("$(c.name) not in group 2"))
     end
+end
+function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:AbstractString
+    f = valuefunction(x,c.value)
 end
 
-function pushvalue!(i_array, j_array, value_array, i, j, value::N) where N<:Number
-    if i>0 && j>0
-        push!(i_array, i)
-        push!(j_array, j)
-        push!(value_array, value)
+# take a spice expression as a string and return an
+# anonymous function of the state variable of the MNA system
+# todo: spice units
+function valuefunction(x::MNA, s::AbstractString, io=IOBuffer)
+    l = ncodeunits(s)
+    i = 1
+    write(io,"(x)->")
+    while i<=l
+        m = match(r"(.*?)([vi])\((.*?)\)()"i,s,i)
+        if m==nothing
+            write(io,s[i:end])
+            break
+        end
+        i = m.offsets[4]
+        (before,vi,parameters,nullstring) = m.captures
+        write(io,before)
+        isv = uppercase(vi) == "V"
+        m = match(r"\s*(\S*)\s*,\s*(\S*)\s*",parameters)
+        if m!=nothing
+            (n,p) = m.captures
+            write(io," -x[")
+            index = isv ? x.group1Names[Symbol(n)] : x.group2Names[Symbol(n)]
+            write(io,string(index))
+            write(io,"] +x[")
+            index = isv ? x.group1Names[Symbol(p)] : x.group2Names[Symbol(p)]
+            write(io,string(index))
+            write(io,"] ")
+        else
+            m = match(r"\s*(\S*)\s*",parameters)
+            p = m.captures[1]
+            write(io," x[")
+            index = isv ? x.group1Names[Symbol(p)] : x.group2Names[Symbol(p)]
+            write(io,string(index))
+            write(io,"] ")
+        end
     end
+    Meta.parse(@debug(String(take!(io))))
 end
-
-function pushvalue!(x::MNAbuilder{N}, i, j, value::N) where N<:Number
-    if i>0 && j>0
-        push!(x.Gi, i)
-        push!(x.Gj, j)
-        push!(x.Svalue, value)
-    end
-end
-
-function pushvalue!(x::MNAbuilder{N}, i, j, value::Expr) where N<:Number
-    if i>0 && j>0
-        # push! into H and g(x)
-        @debug value
-    end
-end
-=#
