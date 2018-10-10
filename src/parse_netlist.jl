@@ -19,33 +19,33 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
     value = parse_constant_spicevalue(N, value_string)
     nodes = update_group1Names!(pc, node_strings)
     if line[1] == 'R'
-        newcomponent = resistor(name, nodes, value, parameters_string)
-        increment_length_g(pc,value)
+        newcomponent = resistor(name, nodes, value,
+            increment_length_g!(pc,value), parameters_string)
     elseif line[1] == 'C'
-        newcomponent = capacitor(name, nodes, value, parameters_string)
-        increment_length_d(pc,value)
+        newcomponent = capacitor(name, nodes, value,
+            increment_length_d!(pc,value),parameters_string)
     elseif line[1] =='L'
-        newcomponent = inductor(name, nodes, value, parameters_string)
-        increment_length_d(pc,value)
+        newcomponent = inductor(name, nodes, value,
+            increment_length_d!(pc,value), parameters_string)
     elseif line[1] =='V'
-        newcomponent = voltageSource(name, nodes, value, parameters_string)
-        increment_length_g(pc,value)
+        newcomponent = voltageSource(name, nodes, value,
+            increment_length_g!(pc,value),parameters_string)
         push!(pc.group2,name)
     elseif line[1] =='I'
-        newcomponent = currentSource(name, nodes, value, parameters_string)
-        increment_length_g(pc,value)
+        newcomponent = currentSource(name, nodes, value,
+            increment_length_g!(pc,value,newcomponent), parameters_string)
     end
     pc.max_element +=1
     push!(pc.netlist, newcomponent)
     return true
 end
 
-increment_length_d(::ParsedCircuit, ::Any) = nothing
-function increment_length_d(pc::ParsedCircuit, ::AbstractString)
+increment_length_d!(::ParsedCircuit, ::Any) = nothing
+function increment_length_d!(pc::ParsedCircuit, ::AbstractString)
     pc.length_d += 1
 end
-increment_length_g(::ParsedCircuit, ::Any) = nothing
-function increment_length_g(pc::ParsedCircuit, ::AbstractString)
+increment_length_g!(::ParsedCircuit, ::Any) = nothing
+function increment_length_g!(pc::ParsedCircuit, ::AbstractString)
     pc.length_g += 1
 end
 
@@ -100,7 +100,7 @@ end
 
 
 
-
+#=
 
 function parse_spiceexpression(N,s)
     (value = parse_spicevalue(N,s)) != nothing && return value
@@ -135,3 +135,5 @@ function fix_branchcurrents(s)
     subex = s"branchcurrent(Val(Symbol(\"\g<name2>\")))-branchcurrent(Val(Symbol(\"\g<name1>\")))"
     replace(s,regex => subex)
 end
+
+=#

@@ -10,6 +10,7 @@
 function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     x = blankmna(pc,group2)
     processnetlist!(x,pc)
+    x
 end
 
 function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
@@ -93,13 +94,13 @@ function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:Number
     end
 end
 function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:AbstractString
-    f = valuefunction(x,c.value)
+    @debug f = valuefunction(x,c.value)
 end
 
 # take a spice expression as a string and return an
 # anonymous function of the state variable of the MNA system
 # todo: spice units
-function valuefunction(x::MNA, s::AbstractString, io=IOBuffer)
+function valuefunction(x::MNA, s::AbstractString, io=IOBuffer())
     l = ncodeunits(s)
     i = 1
     write(io,"(x)->")
@@ -132,5 +133,5 @@ function valuefunction(x::MNA, s::AbstractString, io=IOBuffer)
             write(io,"] ")
         end
     end
-    Meta.parse(@debug(String(take!(io))))
+    Meta.parse(String(take!(io)))
 end

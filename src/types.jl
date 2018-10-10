@@ -3,24 +3,25 @@
     name :: Symbol
     nodes :: Tuple{Vararg{Int}}
     value :: ValueType
+    dg_position :: Union{Int,Nothing}
 end
 
 abstract type Component{U} end
 
 struct Resistor{ValueType} <: Component{ValueType} @componentfileds end
-resistor(name, nodes, value, parameters_string) = Resistor(name, nodes, value)
+resistor(name, nodes, value, dg_position, parameters_string) = Resistor(name, nodes, value, dg_position)
 
 struct Inductor{ValueType} <: Component{ValueType} @componentfileds end
-inductor(name, nodes, value, parameters_string) = Inductor(name, nodes, value)
+inductor(name, nodes, value, dg_position, parameters_string) = Inductor(name, nodes, value, dg_position)
 
 struct Capacitor{ValueType} <: Component{ValueType} @componentfileds end
-capacitor(name, nodes, value, parameters_string) = Capacitor(name, nodes, value)
+capacitor(name, nodes, value, dg_position, parameters_string) = Capacitor(name, nodes, value, dg_position)
 
 struct VoltageSource{ValueType} <: Component{ValueType} @componentfileds end
-voltageSource(name, nodes, value, parameters_string) = VoltageSource(name, nodes, value)
+voltageSource(name, nodes, value, dg_position, parameters_string) = VoltageSource(name, nodes, value, dg_position)
 
 struct CurrentSource{ValueType} <: Component{ValueType} @componentfileds end
-currentSource(name, nodes, value, parameters_string) = CurrentSource(name, nodes, value)
+currentSource(name, nodes, value, dg_position, parameters_string) = CurrentSource(name, nodes, value, dg_position)
 
 const NameDict = Dict{Symbol,Int}
 const Group2Type = Set{Symbol}
