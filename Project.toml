@@ -4,7 +4,9 @@ authors = ["Chris Stook <chris@chrisstook.com>"]
 version = "0.1.0"
 
 [deps]
+DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+NLsolve = "2774e3e8-f4cf-5e23-947b-6d7e65073b56"
 ResumableFunctions = "c5292f4c-5179-55e1-98c5-05642aab7184"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
