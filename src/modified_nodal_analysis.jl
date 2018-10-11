@@ -94,7 +94,12 @@ function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:Number
     end
 end
 function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:AbstractString
-    @debug f = valuefunction(x,c.value)
+    f = valuefunction(x,c.value)
+    x.g[c.dg_position] = f
+    vp = c.nodes[2]
+    vn = c.nodes[1]
+    vp!=0 && (x.H[vp,c.dg_position] = 1)
+    vn!=0 && (x.H[vn,c.dg_position] =-1)
 end
 
 # take a spice expression as a string and return an
@@ -133,5 +138,5 @@ function valuefunction(x::MNA, s::AbstractString, io=IOBuffer())
             write(io,"] ")
         end
     end
-    Meta.parse(String(take!(io)))
+    eval(Meta.parse(String(take!(io))))
 end

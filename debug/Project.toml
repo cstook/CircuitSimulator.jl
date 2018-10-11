@@ -1,0 +1,4 @@
+[deps]
+CircuitSimulator = "11c13930-7915-11e8-388a-47fcf8988b4a"
+LegibleLambdas = "345df9f9-36a4-5429-bf65-472538a9e10c"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
