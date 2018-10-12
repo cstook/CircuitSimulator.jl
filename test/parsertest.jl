@@ -18,12 +18,12 @@ using CircuitSimulator: ParsedCircuit, MNA,
     @test pc.titleline == "Hello World"
     @test pc.group1Names==NameDict(Symbol("a")=>1,Symbol("b")=>2,Symbol(1)=>3,Symbol(2)=>4,Symbol(0)=>0)
     @test pc.max_node == maximum(collect(values(pc.group1Names)))
-    @test pc.netlist[1] == Resistor(:R1,(1,2),10.0e3)
-    @test pc.netlist[2] == Resistor(:R2,(1,0),10.0)
-    @test pc.netlist[3] == Inductor(:Lone,(3,4),23.7e6)
-    @test pc.netlist[4] == Capacitor(:C10,(3,1),2.0)
-    @test pc.netlist[5] == VoltageSource(:V1,(2,0),2.0)
-    @test pc.netlist[6] == CurrentSource(:I1,(4,2),3.0)
+    @test pc.netlist[1] == Resistor(:R1,(1,2),10.0e3,nothing)
+    @test pc.netlist[2] == Resistor(:R2,(1,0),10.0,nothing)
+    @test pc.netlist[3] == Inductor(:Lone,(3,4),23.7e6,nothing)
+    @test pc.netlist[4] == Capacitor(:C10,(3,1),2.0,nothing)
+    @test pc.netlist[5] == VoltageSource(:V1,(2,0),2.0,nothing)
+    @test pc.netlist[6] == CurrentSource(:I1,(4,2),3.0,nothing)
     @test pc.max_element == length(pc.netlist)
     netlist2=IOBuffer(
     """netlist2

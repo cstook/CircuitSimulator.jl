@@ -41,19 +41,19 @@ end
 
 
 #=
-G*x(t) + H*g(x) + D*x'(t) = s(t)
+G*x + H*g(x) + D*x' + H2*d(x') = S + s(x)
 
 
 G = MNA system matrix, constant matrix (linear resitors)
 H = elements are either -1,0,+1
 g(x) = vector of nonlinear element functions
 D = constant matrix from L,C
-H2 = elements are either -1,0,+1 not included yet
-d(x) = nonlinear L,C, not included yet
+H2 = elements are either -1,0,+1
+d(x') = nonlinear L,C
 S = constant source vector
 s = nonlinear source vector
 =#
-struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractArray, V3<:AbstractArray}
+struct MNA{N<:Number,M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractArray, V3<:AbstractArray}
     G :: M
     H :: M2
     g :: V
@@ -64,7 +64,7 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
     s :: V3
     group1Names :: NameDict # nodes
     group2Names :: NameDict # components
-    function MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names) where {M,M2,V,V2,V3}
+    function MNA{N,M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names) where {N,M,M2,V,V2,V3}
         @assert ndims(G) == 2 "G must have 2 dimensions"
         @assert ndims(H) == 2 "H must have 2 dimensions"
         @assert ndims(D) == 2 "D must have 2 dimensions"
@@ -92,5 +92,5 @@ struct MNA{M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:AbstractAr
     end
 end
 MNA(G::M, H::M2, g::V, D::M, H2::M2,
-    d::V, S::V2, s::V3, group1Names, group2Names) where {M,M2,V,V2,V3} =
-        MNA{M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
+    d::V, S::V2, s::V3, group1Names, group2Names) where {N,M,M2,V,V2,V3} =
+        MNA{N,M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)

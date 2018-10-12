@@ -33,7 +33,7 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
         push!(pc.group2,name)
     elseif line[1] =='I'
         newcomponent = currentSource(name, nodes, value,
-            increment_length_g!(pc,value,newcomponent), parameters_string)
+            increment_length_g!(pc,value), parameters_string)
     end
     pc.max_element +=1
     push!(pc.netlist, newcomponent)
