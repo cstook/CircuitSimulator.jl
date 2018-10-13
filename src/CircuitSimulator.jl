@@ -6,6 +6,7 @@ using ResumableFunctions
 using SparseArrays
 using Base.Meta
 using LinearAlgebra
+using NLsolve
 
 
 include("def_macro.jl")

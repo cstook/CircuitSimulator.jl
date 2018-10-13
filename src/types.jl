@@ -92,5 +92,5 @@ struct MNA{N<:Number,M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:
     end
 end
 MNA(G::M, H::M2, g::V, D::M, H2::M2,
-    d::V, S::V2, s::V3, group1Names, group2Names) where {N,M,M2,V,V2,V3} =
-        MNA{N,M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
+    d::V, S::V2, s::V3, group1Names, group2Names) where {M,M2,V,V2,V3} =
+        MNA{eltype(G),M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
