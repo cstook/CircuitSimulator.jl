@@ -16,7 +16,7 @@ using CircuitSimulator: ParsedCircuit, MNA,
 
     pc = @test_logs (:warn, "Not Processed: ") parse_netlist(netlist1)
     @test pc.titleline == "Hello World"
-    @test pc.group1Names==NameDict(Symbol("a")=>1,Symbol("b")=>2,Symbol(1)=>3,Symbol(2)=>4,Symbol(0)=>0)
+    @test pc.group1Names==NameDict(Symbol("a")=>1,Symbol("b")=>2,Symbol(1)=>3,Symbol(2)=>4, Symbol(0)=>0)
     @test pc.max_node == maximum(collect(values(pc.group1Names)))
     @test pc.netlist[1] == Resistor(:R1,(1,2),10.0e3,nothing)
     @test pc.netlist[2] == Resistor(:R2,(1,0),10.0,nothing)

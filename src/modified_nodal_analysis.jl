@@ -14,7 +14,7 @@ function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
 end
 
 function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
-    mnagroup1Names = copy(pc.group1Names)
+    mnagroup1Names = Dict(setdiff(copy(pc.group1Names), Dict(Symbol(0)=>0)))
     mnaGroup2 = union(group2,pc.group2)
     y = length(mnagroup1Names) + length(mnaGroup2)
     G = spzeros(N, y, y)
@@ -41,7 +41,7 @@ function processnetlist!(x::MNA, pc::ParsedCircuit{N})  where N<:Number
     end
 end
 
-
+# DO NOT ADD NODE 0!
 # retain currents for group 2, voltage sources and anything else we want currents for
 addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component $c"
 function addstamp!(x::MNA, c::Resistor{T}, g2::Bool) where T<:Number
@@ -76,30 +76,69 @@ function addstamp!(x::MNA, c::Resistor{T}, g2::Bool) where T<:AbstractString
 end
 
 function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:Number
-    vp = c.nodes[2]
-    vn = c.nodes[1]
-    if g2
-        i = x.group2Names[c.name]
-        if vp!=0
-            x.G[i,vp] += +1
-            x.G[vp,i] += +1
-        end
-        if vn!=0
-            x.G[i,vn] += -1
-            x.G[vn,i] += -1
-        end
-        x.S[i] += c.value
-    else
+    if ~g2
         throw(ErrorException("$(c.name) not in group 2"))
     end
+    vp = c.nodes[2]
+    vn = c.nodes[1]
+    i = x.group2Names[c.name]
+    if vp!=0
+        x.G[i,vp] += +1
+        x.G[vp,i] += +1
+    end
+    if vn!=0
+        x.G[i,vn] += -1
+        x.G[vn,i] += -1
+    end
+    x.S[i] += c.value
 end
 function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:AbstractString
+    if ~g2
+        throw(ErrorException("$(c.name) not in group 2"))
+    end
     f = valuefunction(x,c.value)
     x.g[c.dg_position] = f
     vp = c.nodes[2]
     vn = c.nodes[1]
-    vp!=0 && (x.H[vp,c.dg_position] = 1)
-    vn!=0 && (x.H[vn,c.dg_position] =-1)
+    i = x.group2Names[c.name]
+    if vp!=0
+        x.G[i,vp] += +1
+        x.G[vp,i] += +1
+    end
+    if vn!=0
+        x.G[i,vn] += -1
+        x.G[vn,i] += -1
+    end
+    x.H[i,c.dg_position] = 1
+end
+function addstamp!(x::MNA, c::CurrentSource{T}, g2::Bool) where T<:Number
+    vp = c.nodes[2]
+    vn = c.nodes[1]
+    if g2
+        i = x.group2Names[c.name]
+        vp!=0 && (x.G[vp,i] += +1)
+        vn!=0 && (x.G[vn,i] += -1)
+        x.G[i,i] += +1
+        x.S[i] += c.value
+    else
+        vp!=0 && (x.S[vp] += -c.value)
+        vn!=0 && (x.S[vn] += c.value)
+    end
+end
+function addstamp!(x::MNA, c::CurrentSource{T}, g2::Bool) where T<:AbstractString
+    vp = c.nodes[2]
+    vn = c.nodes[1]
+    f = valuefunction(x,c.value)
+    x.g[c.dg_position] = f
+    if g2
+        i = x.group2Names[c.name]
+        vp!=0 && (x.G[vp,i] += +1)
+        vn!=0 && (x.G[vn,i] += -1)
+        x.H[i,c.dg_position] = 1
+    else
+        vp!=0 && (x.H[vp,c.dg_position] = 1)
+        vn!=0 && (x.H[vn,c.dg_position] =-1)
+    end
 end
 
 # take a spice expression as a string and return an

@@ -25,5 +25,5 @@ function f!(F,x,m::MNA{N,M,M2,V,V2,V3},w::Working=working(m)) where {N<:Number,M
 #    for _i in i
 #        w.c[_i] = m.s[_i](x)
 #    end
-    F = F .+ w.b #.+ m.S .+ w.c
+    F = F .+ w.b .- m.S .- w.c
 end
