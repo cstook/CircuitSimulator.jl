@@ -14,7 +14,8 @@ function  mna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
 end
 
 function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
-    mnagroup1Names = Dict(setdiff(copy(pc.group1Names), Dict(Symbol(0)=>0)))
+    mnagroup1Names = copy(pc.group1Names)
+    pop!(mnagroup1Names,Symbol(0))
     mnaGroup2 = union(group2,pc.group2)
     y = length(mnagroup1Names) + length(mnaGroup2)
     G = spzeros(N, y, y)
@@ -161,13 +162,13 @@ function valuefunction(x::MNA, s::AbstractString, io=IOBuffer())
         m = match(r"\s*(\S*)\s*,\s*(\S*)\s*",parameters)
         if m!=nothing
             (n,p) = m.captures
-            write(io," -x[")
+            write(io,"( -x[")
             index = isv ? x.group1Names[Symbol(n)] : x.group2Names[Symbol(n)]
             write(io,string(index))
             write(io,"] +x[")
             index = isv ? x.group1Names[Symbol(p)] : x.group2Names[Symbol(p)]
             write(io,string(index))
-            write(io,"] ")
+            write(io,"] )")
         else
             m = match(r"\s*(\S*)\s*",parameters)
             p = m.captures[1]
@@ -177,5 +178,8 @@ function valuefunction(x::MNA, s::AbstractString, io=IOBuffer())
             write(io,"] ")
         end
     end
-    eval(Meta.parse(String(take!(io))))
+    newstring = String(take!(io))
+    ex = Meta.parse(newstring)
+    @debug "expression parser" s newstring  ex
+    eval(ex)
 end
