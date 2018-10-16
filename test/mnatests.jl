@@ -9,7 +9,7 @@ mnaconstants(x::MNA) = (x.G,x.H,x.D,x.H2,x.S)
     """
     \$ Example from p131
     Vs 1 0 2
-    Id1 1 2 1.52e-9*exp( V(2,1)/(1.752*0.02585)-1 )  \$ 1N914 Is = 1.52e-9, n=1.752, Vt=0.02585 ?
+    Id1 1 2 1.52e-9*exp( V(1,2)/(1.752*0.02585)-1 )  \$ 1N914 Is = 1.52e-9, n=1.752, Vt=0.02585 ?
     R1 2 0 1
     R3 2 3 1
     Vr2 3 0 I(Vr2)^3*(I(Vr2)-1) \$ R2
@@ -30,4 +30,16 @@ mnaconstants(x::MNA) = (x.G,x.H,x.D,x.H2,x.S)
     for i in eachindex(c)
         @test arrayequal(c[i],verified[i])
     end
+    @test size(m.G) == (5,5)
+    @test size(m.g) == (2,)
+    @test size(m.H) == (5,2)
+    @test size(m.D) == (5,5)
+    @test size(m.H2) == (5,0)
+    @test size(m.d) == (0,)
+    @test size(m.S) == (5,)
+    @test size(m.s) == (5,)
+    @test m.group1Names == Dict(Symbol("1") => 1,Symbol("2") => 2,Symbol("3") => 3)
+    @test m.group2Names == Dict(:Vr2 => 4, :Vs  => 5)
+    @test m.g[1]([2.0 1.0 0.0 0.0 0.0]) ≈ 2.1722508057179977
+    @test m.g[2]([0.0 0.0 0.0 2.0 0.0]) ≈ 8.0
 end

@@ -19,3 +19,4 @@ end
 include("readcardstest.jl")
 include("parsertest.jl")
 include("mnatests.jl")
+include("solve_dc_tests.jl")
