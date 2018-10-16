@@ -1,5 +1,8 @@
-using CircuitSimulator: mna, parse_netlist
+using CircuitSimulator: mna, parse_netlist, MNA
+using SparseArrays
 using FileIO, JLD2
+
+mnaconstants(x::MNA) = (x.G,x.H,x.D,x.H2,x.S)
 
 @testset "MNA tests" begin
     mna_test_net1 = IOBuffer(
@@ -16,10 +19,15 @@ using FileIO, JLD2
         @warn "Creating mna_test_1.jld2"
         pc_verified = parse_netlist(mna_test_net1)
         mna_verified = mna(pc_verified)
-        @save "test/mna_test_1.jld2" mna_verified
+        verified = mnaconstants(mna_verified)
+        @save "mna_test_1.jld2" verified
     end
+    seekstart(mna_test_net1)
     pc = parse_netlist(mna_test_net1)
     m = mna(pc)
-    @load "test/mna_test_1.jld2" mna_verified
-    @test m == mna_verified
+    c = mnaconstants(m)
+    @load "mna_test_1.jld2" verified
+    for i in eachindex(c)
+        @test arrayequal(c[i],verified[i])
+    end
 end
