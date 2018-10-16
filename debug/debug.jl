@@ -7,7 +7,7 @@ using NLsolve, LinearAlgebra, SparseArrays
 f = "debug/f4r2.net"
 function debugMNA(f)
     pc = parse_netlist(f)
-    b = blankmna(pc,group2=Set(:Id1)
+    b = blankmna(pc)
     m = mna(pc)
 end
 
@@ -17,13 +17,31 @@ end
 
 
 m = debugMNA(f)
-Array(m.G)
-Array(m.H)
+G = Array(m.G)
+g = Array(m.g)
+H = Array(m.H)
+m.S
 
 
+
+include("../src/solve_dc.jl")
 w = working(m)
-nlsolve((F,x)->f!(F,x,m,w),  [1.0, 2.0, 3.0, 4.0, 5.0])
+with_logger(ConsoleLogger(stderr, Debug)) do
+    nlsolve((F,x)->f!(F,x,m,w), zeros(5))
+end
+
+F=zeros(5)
+f!(F,x)=f!(F,x,m,w)
+with_logger(ConsoleLogger(stderr, Debug)) do
+    f!(F,[2.0, 2.0, 2.0, 2.0, 2.0])
+end
+
+g[1]([3.0,2.0,3,3,3])
+
+f1(x,y)=1.52e-9 * exp((-(y) + x) / (1.752 * 0.02585) - 1)
+f1(3.0,2)
+m.group1Names
 
 
-m.g
-~true
+
+m.group2Names

@@ -46,8 +46,8 @@ end
 # retain currents for group 2, voltage sources and anything else we want currents for
 addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component $c"
 function addstamp!(x::MNA, c::Resistor{T}, g2::Bool) where T<:Number
-    vp = c.nodes[2]
-    vn = c.nodes[1]
+    vp = c.nodes[1]
+    vn = c.nodes[2]
     if g2
         if vp!=0
             x.G[i,vp] += +1
@@ -80,8 +80,8 @@ function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:Number
     if ~g2
         throw(ErrorException("$(c.name) not in group 2"))
     end
-    vp = c.nodes[2]
-    vn = c.nodes[1]
+    vp = c.nodes[1]
+    vn = c.nodes[2]
     i = x.group2Names[c.name]
     if vp!=0
         x.G[i,vp] += +1
@@ -99,8 +99,8 @@ function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:AbstractStrin
     end
     f = valuefunction(x,c.value)
     x.g[c.dg_position] = f
-    vp = c.nodes[2]
-    vn = c.nodes[1]
+    vp = c.nodes[1]
+    vn = c.nodes[2]
     i = x.group2Names[c.name]
     if vp!=0
         x.G[i,vp] += +1
@@ -110,11 +110,11 @@ function addstamp!(x::MNA, c::VoltageSource{T}, g2::Bool) where T<:AbstractStrin
         x.G[i,vn] += -1
         x.G[vn,i] += -1
     end
-    x.H[i,c.dg_position] = 1
+    x.H[i,c.dg_position] = -1
 end
 function addstamp!(x::MNA, c::CurrentSource{T}, g2::Bool) where T<:Number
-    vp = c.nodes[2]
-    vn = c.nodes[1]
+    vp = c.nodes[1]
+    vn = c.nodes[2]
     if g2
         i = x.group2Names[c.name]
         vp!=0 && (x.G[vp,i] += +1)
@@ -127,8 +127,8 @@ function addstamp!(x::MNA, c::CurrentSource{T}, g2::Bool) where T<:Number
     end
 end
 function addstamp!(x::MNA, c::CurrentSource{T}, g2::Bool) where T<:AbstractString
-    vp = c.nodes[2]
-    vn = c.nodes[1]
+    vp = c.nodes[1]
+    vn = c.nodes[2]
     f = valuefunction(x,c.value)
     x.g[c.dg_position] = f
     if g2
@@ -162,10 +162,10 @@ function valuefunction(x::MNA, s::AbstractString, io=IOBuffer())
         m = match(r"\s*(\S*)\s*,\s*(\S*)\s*",parameters)
         if m!=nothing
             (n,p) = m.captures
-            write(io,"( -x[")
+            write(io,"( x[")
             index = isv ? x.group1Names[Symbol(n)] : x.group2Names[Symbol(n)]
             write(io,string(index))
-            write(io,"] +x[")
+            write(io,"] -x[")
             index = isv ? x.group1Names[Symbol(p)] : x.group2Names[Symbol(p)]
             write(io,string(index))
             write(io,"] )")

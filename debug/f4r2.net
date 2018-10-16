@@ -1,8 +1,7 @@
 $ Example from p131
 $
-$ change diode to current source
-Vs 0 1 2
-Id1 2 1 1.52e-9*exp( V(2,1)/(1.752*0.02585)-1 )  $ 1N914 Is = 1.52e-9, n=1.752, Vt=0.02585 ?
+Vs 1 0 2
+Id1 1 2 1.52e-9*exp( V(2,1)/(1.752*0.02585)-1 )  $ 1N914 Is = 1.52e-9, n=1.752, Vt=0.02585 ?
 R1 2 0 1
 R3 2 3 1
 Vr2 3 0 I(Vr2)^3*(I(Vr2)-1) $ R2

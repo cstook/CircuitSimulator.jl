@@ -1,4 +1,4 @@
-using CircuitSimulator: ParsedCircuit, MNA,
+using CircuitSimulator: ParsedCircuit,
                         parse_netlist,NameDict, Resistor,
                         Inductor,Capacitor, CurrentSource, VoltageSource
 @testset "parser Tests" begin

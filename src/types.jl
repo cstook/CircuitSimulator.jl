@@ -94,3 +94,26 @@ end
 MNA(G::M, H::M2, g::V, D::M, H2::M2,
     d::V, S::V2, s::V3, group1Names, group2Names) where {M,M2,V,V2,V3} =
         MNA{eltype(G),M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
+
+function arrayequal(x,::AbstractArray, y::AbstractArray)
+    eq = true
+    for (i,j) in zip(findall(!iszero,x),findall(!iszero,y))
+        if i!=j
+            eq=false
+            break
+        end
+        if x[i] != y[i]
+            eq=false
+            break
+        end
+    end
+    eq
+end
+
+function Base.:(==)(x::MNA, y::MNA)
+    arrayequal(x.G, y.G) || return false
+    arrayequal(x.H, y.H) || return false
+    arrayequal(x.D, y.D) || return false
+    arrayequal(x.H2, y.H2) || return false
+    arrayequal(x.S, y.S) || return false
+end
