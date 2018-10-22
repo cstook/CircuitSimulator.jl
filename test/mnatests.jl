@@ -2,7 +2,7 @@ using CircuitSimulator: mna, parse_netlist, MNA
 using SparseArrays
 using FileIO, JLD2
 
-mnaconstants(x::MNA) = (x.G,x.H,x.D,x.H2,x.S)
+mnaconstants(x::MNA) = (x.G,x.H,x.D,x.E,x.S)
 
 @testset "MNA tests" begin
     mna_test_net1 = IOBuffer(
@@ -34,12 +34,12 @@ mnaconstants(x::MNA) = (x.G,x.H,x.D,x.H2,x.S)
     @test size(m.g) == (2,)
     @test size(m.H) == (5,2)
     @test size(m.D) == (5,5)
-    @test size(m.H2) == (5,0)
+    @test size(m.E) == (5,0)
     @test size(m.d) == (0,)
     @test size(m.S) == (5,)
     @test size(m.s) == (5,)
     @test m.group1Names == Dict(Symbol("1") => 1,Symbol("2") => 2,Symbol("3") => 3)
     @test m.group2Names == Dict(:Vr2 => 4, :Vs  => 5)
-    @test m.g[1]([2.0 1.0 0.0 0.0 0.0]) ≈ 2.1722508057179977
-    @test m.g[2]([0.0 0.0 0.0 2.0 0.0]) ≈ 8.0
+    @test m.g[1]([2.0 1.0 0.0 0.0 0.0],0) ≈ 2.1722508057179977
+    @test m.g[2]([0.0 0.0 0.0 2.0 0.0],0) ≈ 8.0
 end

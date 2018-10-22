@@ -18,7 +18,7 @@ using NLsolve: nlsolve
     result = nlsolve((F,x)->f!(F,x,m), zeros(5))
     @test arrayequal(result.zero,[2.0,1.0264162801997632,0.8405754962629832,
         1.3452652876737965,-2.37168156787356])
-    @test m.g[1](result.zero) ≈ 1.212257064136541
+    @test m.g[1](result.zero,0) ≈ 1.212257064136541
 
     # for now...
     w = working(m)

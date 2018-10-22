@@ -41,14 +41,14 @@ end
 
 
 #=
-G*x + H*g(x) + D*x' + H2*d(x') = S + s(x)
+G*x + H*g(x) + D*x' + E*d(x') = S + s(x)
 
 
 G = MNA system matrix, constant matrix (linear resitors)
 H = elements are either -1,0,+1
 g(x) = vector of nonlinear element functions
 D = constant matrix from L,C
-H2 = elements are either -1,0,+1
+E = elements are either -1,0,+1
 d(x') = nonlinear L,C
 S = constant source vector
 s = nonlinear source vector
@@ -58,17 +58,17 @@ struct MNA{N<:Number,M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:
     H :: M2
     g :: V
     D :: M
-    H2 :: M2
+    E :: M2
     d :: V
     S :: V2
     s :: V3
     group1Names :: NameDict # nodes
     group2Names :: NameDict # components
-    function MNA{N,M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names) where {N,M,M2,V,V2,V3}
+    function MNA{N,M,M2,V,V2,V3}(G,H,g,D,E,d,S,s,group1Names,group2Names) where {N,M,M2,V,V2,V3}
         @assert ndims(G) == 2 "G must have 2 dimensions"
         @assert ndims(H) == 2 "H must have 2 dimensions"
         @assert ndims(D) == 2 "D must have 2 dimensions"
-        @assert ndims(H2) == 2 "H2 must have 2 dimensions"
+        @assert ndims(E) == 2 "E must have 2 dimensions"
         @assert ndims(g) == 1 "g must have 1 dimensions"
         @assert ndims(d) == 1 "d must have 1 dimensions"
         @assert ndims(S) == 1 "S must have 1 dimensions"
@@ -82,15 +82,15 @@ struct MNA{N<:Number,M<:AbstractArray, M2<:AbstractArray, V<:AbstractArray, V2<:
         @assert Hy==y "H,y mismatch $Hy, $y"
         (Dy,Dx) = size(D)
         @assert Dy==Dx "D not square $Dx x $Gy"
-        (H2y,H2x) = size(H2)
-        @assert H2x==length(d) "H2,d mismatch $H2x, $(length(d))"
-        @assert H2y==y "H2,y mismatch $H2y, $y"
-        if ~(Gy==Gx==Hy==Dy==Dx==H2y==length(S)==length(s))
+        (Ey,Ex) = size(E)
+        @assert Ex==length(d) "E,d mismatch $Ex, $(length(d))"
+        @assert Ey==y "E,y mismatch $Ey, $y"
+        if ~(Gy==Gx==Hy==Dy==Dx==Ey==length(S)==length(s))
             throw(DimensionMismatch())
         end
-        new(G,H,g,D,H2,d,S,s,group1Names,group2Names)
+        new(G,H,g,D,E,d,S,s,group1Names,group2Names)
     end
 end
-MNA(G::M, H::M2, g::V, D::M, H2::M2,
+MNA(G::M, H::M2, g::V, D::M, E::M2,
     d::V, S::V2, s::V3, group1Names, group2Names) where {M,M2,V,V2,V3} =
-        MNA{eltype(G),M,M2,V,V2,V3}(G,H,g,D,H2,d,S,s,group1Names,group2Names)
+        MNA{eltype(G),M,M2,V,V2,V3}(G,H,g,D,E,d,S,s,group1Names,group2Names)

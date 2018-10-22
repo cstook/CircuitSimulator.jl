@@ -22,7 +22,7 @@ function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
     H = spzeros(Int8, y, pc.length_g)
     g = Array{Function}(undef, pc.length_g)
     D = spzeros(N, y, y)
-    H2 = spzeros(Int8, y, pc.length_d)
+    E = spzeros(Int8, y, pc.length_d)
     d = Array{Function}(undef, pc.length_d)
     S = spzeros(N, y)
     s = spzeros(Function, y)
@@ -33,7 +33,7 @@ function blankmna(pc::ParsedCircuit{N}, group2 = Group2Type()) where N<:Number
         group2Names[name] = i
         i+=1
     end
-    MNA(G,H,g,D,H2,d,S,s,mnagroup1Names,group2Names)
+    MNA(G,H,g,D,E,d,S,s,mnagroup1Names,group2Names)
 end
 
 function processnetlist!(x::MNA, pc::ParsedCircuit{N})  where N<:Number
@@ -44,7 +44,7 @@ end
 
 # DO NOT ADD NODE 0!
 # retain currents for group 2, voltage sources and anything else we want currents for
-addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component $c"
+addstamp!(::MNA, c::Component, ::Bool) = @warn "unknown component" c
 function addstamp!(x::MNA, c::Resistor{T}, g2::Bool) where T<:Number
     vp = c.nodes[1]
     vn = c.nodes[2]
@@ -141,6 +141,46 @@ function addstamp!(x::MNA, c::CurrentSource{T}, g2::Bool) where T<:AbstractStrin
         vn!=0 && (x.H[vn,c.dg_position] =-1)
     end
 end
+function addstamp!(x::MNA, c::Capacitor{T}, g2::Bool) where T<:Number
+    vp = c.nodes[1]
+    vn = c.nodes[2]
+    if g2
+        i = x.group2Names[c.name]
+        if vp!=0
+            x.D[vp,i] = -c.value
+        end
+        if vn!=0
+            x.D[vn,i] = c.value
+        end
+        x.G[i,i] = 1
+    else
+        if vp!=0
+            x.D[vp,vp] += +c.value
+        end
+        if vn!=0
+            x.D[vn,vn] += +c.value
+            if vp!=0
+                x.D[vp,vn] += -c.value
+                x.D[vn,vp] += -c.value
+            end
+        end
+    end
+end
+function addstamp!(x::MNA, c::Inductor{T}, g2::Bool) where T<:Number
+    if ~g2
+        throw(ErrorException("$(c.name) not in group 2"))
+    end
+    vp = c.nodes[1]
+    vn = c.nodes[2]
+    i = x.group2Names[c.name]
+    if vp!=0
+        x.D[vp,i] = 1
+    end
+    if vn!=0
+        x.D[vn,i] = -1
+    end
+    x.D[i,i] = c.value
+end
 
 # take a spice expression as a string and return an
 # anonymous function of the state variable of the MNA system
@@ -148,7 +188,7 @@ end
 function valuefunction(x::MNA, s::AbstractString, io=IOBuffer())
     l = ncodeunits(s)
     i = 1
-    write(io,"(x)->")
+    write(io,"(x,time)->")
     while i<=l
         m = match(r"(.*?)([vi])\((.*?)\)()"i,s,i)
         if m==nothing

@@ -18,7 +18,7 @@ end
 function f!(F,x,m::MNA{N,M,M2,V,V2,V3},w::Working=working(m)) where {N<:Number,M,M2,V,V2,V3}
     mul!(F,m.G,x)
     for i in eachindex(m.g)
-        w.a[i] = m.g[i](x)
+        w.a[i] = m.g[i](x,0)
         @debug "f! g debug" nonlinear=w.a[i] i x
     end
     mul!(w.b,m.H,w.a)
