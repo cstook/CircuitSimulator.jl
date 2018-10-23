@@ -42,4 +42,30 @@ mnaconstants(x::MNA) = (x.G,x.H,x.D,x.E,x.S)
     @test m.group2Names == Dict(:Vr2 => 4, :Vs  => 5)
     @test m.g[1]([2.0 1.0 0.0 0.0 0.0],0) ≈ 2.1722508057179977
     @test m.g[2]([0.0 0.0 0.0 2.0 0.0],0) ≈ 8.0
+
+
+
+    mna_test_net2 = IOBuffer(
+    """
+    \$ quick L, C check
+    Vs 1 0 2
+    L1 1 2 5.6
+    C1 2 3 2.3
+    R1 3 0 1.2
+    """)
+    if ~isfile("mna_test_2.jld2")
+        @warn "Creating mna_test_2.jld2"
+        pc_verified = parse_netlist(mna_test_net2)
+        mna_verified = mna(pc_verified)
+        verified = mnaconstants(mna_verified)
+        @save "mna_test_2.jld2" verified
+    end
+    seekstart(mna_test_net2)
+    pc = parse_netlist(mna_test_net2)
+    m = mna(pc)
+    c = mnaconstants(m)
+    @load "mna_test_2.jld2" verified
+    for i in eachindex(c)
+        @test arrayequal(c[i],verified[i])
+    end
 end

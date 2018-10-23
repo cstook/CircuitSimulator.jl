@@ -27,6 +27,7 @@ function parse_2nodecomponent!(pc::ParsedCircuit{N}, line) where {N<:Number}
     elseif line[1] =='L'
         newcomponent = inductor(name, nodes, value,
             increment_length_d!(pc,value), parameters_string)
+        push!(pc.group2,name)
     elseif line[1] =='V'
         newcomponent = voltageSource(name, nodes, value,
             increment_length_g!(pc,value),parameters_string)
